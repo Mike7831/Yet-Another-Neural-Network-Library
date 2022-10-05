@@ -1,2 +1,0 @@
-Error after 1 case: 0.298371
-Error after 10000 cases: 2.44834e-06

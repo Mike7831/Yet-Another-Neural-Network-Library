@@ -1,0 +1,45 @@
+# depslib dependency file v1.0
+1664378259 source:c:\users\mdeloison\_never backup\cpp\yannl-vc\src\activationfunction.cpp
+	"ActivationFunction.h"
+
+1664378253 c:\users\mdeloison\_never backup\cpp\yannl-vc\include\activationfunction.h
+	<string>
+	<cmath>
+	<memory>
+	<typeinfo>
+
+1664968480 source:c:\users\mdeloison\_never backup\cpp\yannl-vc\main.cpp
+	"NeuralNetwork.h"
+	"Utils.h"
+	"MnistReader.h"
+	<iomanip>
+	<cassert>
+
+1664968447 c:\users\mdeloison\_never backup\cpp\yannl-vc\include\neuralnetwork.h
+	"NeuronLayer.h"
+
+1664968470 c:\users\mdeloison\_never backup\cpp\yannl-vc\include\neuronlayer.h
+	"Neuron.h"
+	<sstream>
+	<numeric>
+	<algorithm>
+
+1664896734 c:\users\mdeloison\_never backup\cpp\yannl-vc\include\neuron.h
+	"ActivationFunction.h"
+	<iostream>
+	<fstream>
+	<vector>
+	<random>
+
+1664812312 c:\users\mdeloison\_never backup\cpp\yannl-vc\include\utils.h
+	<iostream>
+	<vector>
+	<algorithm>
+	<windows.h>
+
+1664968824 c:\users\mdeloison\_never backup\cpp\yannl-vc\include\mnistreader.h
+	"Utils.h"
+	<fstream>
+	<sstream>
+	<vector>
+

@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
         }
 
         // First test with bias
-        if (false)
+        if (true)
         {
             NeuralNetwork net(2, 0.5);
             net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
             net.propagateBackward({ 0.01, 0.99 });
             net.inspect(std::cout);
 
-            net.saveToFile("outputs/MM_NN_net.txt");
+            net.saveToFile("output/MM_NN_net.txt");
         }
 
         // With epochs
@@ -283,12 +283,12 @@ int main(int argc, char* argv[])
         // Load first network
         if (false)
         {
-            const std::string path = "outputs/MM_NN_net.txt";
+            const std::string path = "output/MM_NN_net.txt";
             std::cout << "Loading neural network from file " << path << "..." << std::endl;
             NeuralNetwork net = NeuralNetwork::loadFromFile(path);
             std::cout << "Done." << std::endl;
 
-            net.saveToFile("outputs/MM_NN_net_compare.txt");
+            net.saveToFile("output/MM_NN_net_compare.txt");
         }
 
         // First test with momentum and bias
@@ -308,7 +308,7 @@ int main(int argc, char* argv[])
             std::cout << "Error: " << net.calcError({ 0.01, 0.99 }) << std::endl;
             net.propagateBackward({ 0.01, 0.99 });
             net.inspect(std::cout);
-            net.saveToFile("outputs/MM_NN_net.txt");
+            net.saveToFile("output/MM_NN_net.txt");
         }
 
         // First test with classifier and cross-entropy
@@ -501,7 +501,7 @@ int main(int argc, char* argv[])
                 std::cout.unsetf(std::ios_base::fixed);
             }
 
-            net.saveToFile("outputs/YANNL_net.txt");
+            net.saveToFile("output/YANNL_net.txt");
             std::cout << "Network trained and saved." << std::endl;
         }
 
@@ -535,7 +535,7 @@ int main(int argc, char* argv[])
             }
 
             // Load the network
-            const std::string path = "outputs/YANNL_net.txt";
+            const std::string path = "output/YANNL_net.txt";
             std::cout << "Loading neural network from file " << path << "..." << std::endl;
             NeuralNetwork net = NeuralNetwork::loadFromFile(path);
             std::cout << "Done." << std::endl;;

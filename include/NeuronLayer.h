@@ -23,12 +23,15 @@ public:
     virtual size_t size() const = 0;
     virtual LayerType type() const = 0;
     virtual void inspect(std::ostream& os, size_t& weightN) const = 0;
-    virtual std::vector<double> propagateForward(const std::vector<double>& inputs) = 0;
+    virtual std::vector<double> propagateForward(const std::vector<double>& inputs, bool ignoreDropout) = 0;
     virtual size_t probableClass() const = 0;
     virtual double calcError(const std::vector<double>& expectedOutputs) const = 0;
     virtual void propagateBackwardOuputLayer(const std::vector<double>& expectedOutputs) = 0;
     virtual void propagateBackwardHiddenLayer(const NeuronLayer& nextLayer) = 0;
     virtual double sumDelta(size_t weightN) const = 0;
+    virtual bool droppedNeuron(size_t neuronN) const = 0;
+    virtual bool dropoutLayer() const = 0;
+    virtual double dropoutRate() const = 0;
     virtual void updateWeights() = 0;
     virtual void saveToFile(std::ofstream& output) const = 0;
 };
@@ -36,25 +39,41 @@ public:
 class DenseLayer : public NeuronLayer // public inheritance to be able to use std::make_shared
 {
 public:
-    explicit DenseLayer(size_t neuronsN, size_t prevLayerNeuronsN, ActivationFunctions afunc,
-        double learningRate, double momentum, double bias = 0.0) :
+    explicit DenseLayer(size_t neuronsN, size_t prevLayerNeuronsN,
+        ActivationFunctions afunc, double learningRate, double momentum,
+        const std::shared_ptr<SeedGenerator>& seedGen, double bias = 0.0) :
         m_AFunc(afunc), m_LearningRate(learningRate), m_Momentum(momentum)
     {
         for (size_t i = 0; i < neuronsN; i++)
         {
-            m_Neurons.push_back(Neuron(prevLayerNeuronsN, afunc, learningRate, momentum, bias));
+            m_Neurons.push_back(Neuron(prevLayerNeuronsN, afunc, learningRate,
+                momentum, seedGen, bias));
         }
     }
 
-    explicit DenseLayer(const std::vector<std::vector<double>>& layerWeights, ActivationFunctions afunc,
-        double learningRate, double momentum, double bias = 0.0) :
+    explicit DenseLayer(const std::vector<std::vector<double>>& layerWeights,
+        ActivationFunctions afunc,  double learningRate, double momentum,
+        const std::shared_ptr<SeedGenerator>& seedGen, double bias = 0.0) :
         m_AFunc(afunc), m_LearningRate(learningRate), m_Momentum(momentum)
     {
         std::for_each(layerWeights.cbegin(), layerWeights.cend(),
             [&](const std::vector<double>& neuronWeigths)
             {
-                m_Neurons.push_back(Neuron(neuronWeigths, afunc, learningRate, momentum, bias));
+                m_Neurons.push_back(Neuron(neuronWeigths, afunc, learningRate,
+                    momentum, bias));
             });
+    }
+
+    explicit DenseLayer(const std::vector<std::vector<double>>& layerWeights,
+        const std::vector<double>& layerBias, ActivationFunctions afunc,
+        double learningRate, double momentum, const std::shared_ptr<SeedGenerator>& seedGen) :
+        m_AFunc(afunc), m_LearningRate(learningRate), m_Momentum(momentum)
+    {
+        for (size_t n = 0; n < layerWeights.size(); n++)
+        {
+            m_Neurons.push_back(Neuron(layerWeights[n], afunc, learningRate,
+                momentum, layerBias[n]));
+        }
     }
 
     // No need to apply the rule of five as the class contains no raw pointers
@@ -79,8 +98,9 @@ public:
     //! Propagates the input forward and calculates the outputs. To be specialized
     //! for output classification layer as the outputs are dependent of all the inputs.
     //! @param inputs Vector of inputs.
+    //! @param ignoreDropout Tells to ingore dropout during testing or validation.
     //! @returns Vector of outputs.
-    std::vector<double> propagateForward(const std::vector<double>& inputs) override
+    std::vector<double> propagateForward(const std::vector<double>& inputs, bool ignoreDropout) override
     {
         std::vector<double> outputs;
 
@@ -93,7 +113,7 @@ public:
                 // in the following equations, the gradient is 0.
                 // dn/dw = i
                 // Gradient = delta * dn/dw = delta * i
-                outputs.push_back(neuron.calcOutput(inputs));
+                outputs.push_back(neuron.propagateForward(inputs));
             });
 
         return outputs;
@@ -134,7 +154,10 @@ public:
             // dE/do = Sum(deltaOutputNeurons * w)
             double sum = nextLayer.sumDelta(n);
 
-            m_Neurons[n].propagateBackwardHiddenLayer(sum);
+            m_Neurons[n].propagateBackwardHiddenLayer(sum,
+                nextLayer.dropoutLayer(),
+                nextLayer.dropoutRate(),
+                nextLayer.droppedNeuron(n));
         }
     }
 
@@ -149,6 +172,25 @@ public:
         }
 
         return sum;
+    }
+
+    bool droppedNeuron(size_t neuronN) const override
+    {
+        // Neurons are dropped only on a dropout layer.
+        // neuronN has no importance; no need to verify its range.
+
+        return false;
+    }
+
+    bool dropoutLayer() const override
+    {
+        return false;
+    }
+
+    double dropoutRate() const override
+    {
+        // Not a dropout layer; so dropout rate is always 0.0, i.e. keep neuron.
+        return 0.0;
     }
 
     void updateWeights() override
@@ -172,7 +214,7 @@ public:
             output << 0 << " ";
         }
 
-        output << m_Neurons.size() << " " << std::endl;
+        output << m_Neurons.size() << " " << "\n";
 
         for (const Neuron& neuron : m_Neurons)
         {
@@ -190,16 +232,26 @@ protected:
 class HiddenLayer : public DenseLayer // public inheritance to be able to use std::make_shared
 {
 public:
-    explicit HiddenLayer(size_t neuronsN, size_t prevLayerNeuronsN, ActivationFunctions afunc,
-        double learningRate, double momentum, double bias = 0.0) :
-        DenseLayer(neuronsN, prevLayerNeuronsN, afunc, learningRate, momentum, bias)
+    explicit HiddenLayer(size_t neuronsN, size_t prevLayerNeuronsN,
+        ActivationFunctions afunc,  double learningRate, double momentum,
+        const std::shared_ptr<SeedGenerator>& seedGen, double bias = 0.0) :
+        DenseLayer(neuronsN, prevLayerNeuronsN, afunc, learningRate, momentum, seedGen, bias)
     {
 
     }
 
-    explicit HiddenLayer(const std::vector<std::vector<double>>& layerWeights, ActivationFunctions afunc,
-        double learningRate, double momentum, double bias = 0.0) :
-        DenseLayer(layerWeights, afunc, learningRate, momentum, bias)
+    explicit HiddenLayer(const std::vector<std::vector<double>>& layerWeights,
+        ActivationFunctions afunc, double learningRate, double momentum,
+        const std::shared_ptr<SeedGenerator>& seedGen, double bias = 0.0) :
+        DenseLayer(layerWeights, afunc, learningRate, momentum, seedGen, bias)
+    {
+
+    }
+
+    explicit HiddenLayer(const std::vector<std::vector<double>>& layerWeights,
+        const std::vector<double>& layerBias, ActivationFunctions afunc,
+        double learningRate, double momentum, const std::shared_ptr<SeedGenerator>& seedGen) :
+        DenseLayer(layerWeights, layerBias, afunc, learningRate, momentum, seedGen)
     {
 
     }
@@ -232,12 +284,13 @@ public:
     }
 };
 
+
 class DropoutLayer : public NeuronLayer // public inheritance to be able to use std::make_shared
 {
 public:
-    explicit DropoutLayer(double rate, size_t size) :
+    explicit DropoutLayer(double rate, size_t size, const std::shared_ptr<SeedGenerator>& seedGen) :
         m_Neurons(size), m_DropoutRate(rate), m_SumDeltaNextLayer(size),
-        m_Generator(m_Rng()), m_Dist(0.0, 1.0)
+        m_Generator(seedGen->seed()), m_Dist(0.0, 1.0)
 
     {
 
@@ -261,13 +314,13 @@ public:
             << "Dropout layer of rate " << m_DropoutRate << "\n";
     }
 
-    std::vector<double> propagateForward(const std::vector<double>& inputs) override
+    std::vector<double> propagateForward(const std::vector<double>& inputs, bool ignoreDropout) override
     {
         std::vector<double> outputs;
 
         for (size_t n = 0; n < m_Neurons.size(); n++)
         {
-            if (m_Dist(m_Generator) >= m_DropoutRate)
+            if (ignoreDropout || m_Dist(m_Generator) >= m_DropoutRate)
             {
                 // Keep neuron from previous layer and rescale output
                 m_Neurons[n] = true;
@@ -325,6 +378,21 @@ public:
         return m_SumDeltaNextLayer[weightN];
     }
 
+    bool droppedNeuron(size_t neuronN) const override
+    {
+        return !m_Neurons[neuronN];
+    }
+
+    bool dropoutLayer() const override
+    {
+        return true;
+    }
+
+    double dropoutRate() const override
+    {
+        return m_DropoutRate;
+    }
+
     void updateWeights() override
     {
 
@@ -333,7 +401,7 @@ public:
     void saveToFile(std::ofstream& output) const override
     {
         output << static_cast<int>(LayerType::Dropout) << " " << m_Neurons.size()
-            << " " << m_DropoutRate << " " << std::endl;
+            << " " << m_DropoutRate << " " << "\n";
     }
 
 private:
@@ -341,26 +409,37 @@ private:
     double m_DropoutRate = 0.0;
     std::vector<double> m_SumDeltaNextLayer;
 
-    std::random_device m_Rng;
     std::mt19937 m_Generator;
     std::uniform_real_distribution<double> m_Dist;
 };
+
 
 class OutputClassificationLayer : public DenseLayer // public inheritance to be able to use std::make_shared
 {
 public:
     explicit OutputClassificationLayer(size_t neuronsN, size_t prevLayerNeuronsN,
-        double learningRate, double momentum, double bias = 0.0) :
+        double learningRate, double momentum,
+        const std::shared_ptr<SeedGenerator>& seedGen, double bias = 0.0) :
         DenseLayer(neuronsN, prevLayerNeuronsN, ActivationFunctions::Identity, learningRate,
-            momentum, bias), m_Outputs(neuronsN)
+            momentum, seedGen, bias), m_Outputs(neuronsN)
     {
 
     }
 
     explicit OutputClassificationLayer(const std::vector<std::vector<double>>& layerWeights,
-        double learningRate, double momentum, double bias = 0.0) :
+        double learningRate, double momentum,
+        const std::shared_ptr<SeedGenerator>& seedGen, double bias = 0.0) :
         DenseLayer(layerWeights, ActivationFunctions::Identity, learningRate,
-            momentum, bias), m_Outputs(layerWeights.size())
+            momentum, seedGen, bias), m_Outputs(layerWeights.size())
+    {
+
+    }
+
+    explicit OutputClassificationLayer(const std::vector<std::vector<double>>& layerWeights,
+        const std::vector<double>& layerBias, double learningRate, double momentum,
+        const std::shared_ptr<SeedGenerator>& seedGen) :
+        DenseLayer(layerWeights, layerBias, ActivationFunctions::Identity, learningRate,
+            momentum, seedGen), m_Outputs(layerWeights.size())
     {
 
     }
@@ -377,14 +456,14 @@ public:
         return LayerType::OutputClassification;
     }
 
-    std::vector<double> propagateForward(const std::vector<double>& inputs) override
+    std::vector<double> propagateForward(const std::vector<double>& inputs, bool ignoreDropout) override
     {
         m_Outputs.clear();
 
         std::for_each(m_Neurons.begin(), m_Neurons.end(),
             [&](Neuron& neuron)
             {
-                m_Outputs.push_back(neuron.calcOutput(inputs));
+                m_Outputs.push_back(neuron.propagateForward(inputs));
             });
 
         double sumExp = std::accumulate(m_Outputs.cbegin(), m_Outputs.cend(), 0.0,
@@ -448,19 +527,30 @@ private:
     std::vector<double> m_Outputs;
 };
 
+
 class OutputRegressionLayer : public DenseLayer // public inheritance to be able to use std::make_shared
 {
 public:
     explicit OutputRegressionLayer(size_t neuronsN, size_t prevLayerNeuronsN,
-        ActivationFunctions afunc, double learningRate, double momentum, double bias = 0.0) :
-        DenseLayer(neuronsN, prevLayerNeuronsN, afunc, learningRate, momentum, bias)
+        ActivationFunctions afunc, double learningRate, double momentum,
+        const std::shared_ptr<SeedGenerator>& seedGen, double bias = 0.0) :
+        DenseLayer(neuronsN, prevLayerNeuronsN, afunc, learningRate, momentum, seedGen, bias)
     {
 
     }
 
     explicit OutputRegressionLayer(const std::vector<std::vector<double>>& layerWeights,
-        ActivationFunctions afunc, double learningRate, double momentum, double bias = 0.0) :
-        DenseLayer(layerWeights, afunc, learningRate, momentum, bias)
+        ActivationFunctions afunc, double learningRate, double momentum,
+        const std::shared_ptr<SeedGenerator>& seedGen, double bias = 0.0) :
+        DenseLayer(layerWeights, afunc, learningRate, momentum, seedGen, bias)
+    {
+
+    }
+
+    explicit OutputRegressionLayer(const std::vector<std::vector<double>>& layerWeights,
+        const std::vector<double>& layerBias, ActivationFunctions afunc,
+        double learningRate, double momentum, const std::shared_ptr<SeedGenerator>& seedGen) :
+        DenseLayer(layerWeights, layerBias, afunc, learningRate, momentum, seedGen)
     {
 
     }

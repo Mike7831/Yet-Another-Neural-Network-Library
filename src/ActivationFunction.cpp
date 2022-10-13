@@ -10,12 +10,16 @@ std::shared_ptr<ActivationFunction> ActivationFunction::build(ActivationFunction
         return std::make_unique<Logistic>();
         break;
 
-    case ActivationFunctions::Relu:
-        return std::make_unique<Relu>();
-        break;
-
     case ActivationFunctions::Tanh:
         return std::make_unique<Tanh>();
+    break;
+    
+    case ActivationFunctions::ReLU:
+        return std::make_unique<ReLU>();
+        break;
+
+    case ActivationFunctions::ISRLU:
+        return std::make_unique<ISRLU>();
         break;
 
     default:

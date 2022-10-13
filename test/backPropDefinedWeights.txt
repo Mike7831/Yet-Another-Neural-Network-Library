@@ -1,0 +1,23 @@
+------
+* Inputs: 2
+------
+Neurons: 2 activation: class YANNL::Logistic
+ Neuron 1
+  w1: 0.149781
+  w2: 0.199561
+  Bias: 0.345614
+ Neuron 2
+  w3: 0.249751
+  w4: 0.299502
+  Bias: 0.345023
+------
+Neurons: 2 activation: class YANNL::Logistic
+ Neuron 1
+  w5: 0.358916
+  w6: 0.408666
+  Bias: 0.530751
+ Neuron 2
+  w7: 0.511301
+  w8: 0.56137
+  Bias: 0.619049
+------

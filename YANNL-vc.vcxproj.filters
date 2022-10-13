@@ -42,6 +42,9 @@
     <ClInclude Include="include\Utils.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
+    <ClInclude Include="include\MLP.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\ActivationFunction.cpp">

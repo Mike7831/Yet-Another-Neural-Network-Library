@@ -2,10 +2,8 @@
 #define YANNL_NEURON_H
 
 #include "ActivationFunction.h"
-#include <iostream> // std::ostream
+#include "Utils.h"  // SeedGenerator
 #include <fstream>  // std::ofstream
-#include <vector>   // std::vector
-#include <random>   // std::random_device
 
 namespace YANNL
 {
@@ -13,24 +11,23 @@ namespace YANNL
 class Neuron
 {
 public:
-    explicit Neuron(size_t weightsN, ActivationFunctions afunc,
-        double learningRate, double momentum, double bias = 0.0) :
+    explicit Neuron(size_t weightsN, ActivationFunctions afunc, double learningRate,
+        double momentum, const std::shared_ptr<SeedGenerator>& seedGen, double bias = 0.0) :
         m_AFunc(ActivationFunction::build(afunc)), m_LearningRate(learningRate),
         m_Momentum(momentum), m_Bias(bias),
-        m_WeightsPrevChange(weightsN), m_BiasPrevChange(0.0)
+        m_WeightsPrevChange(weightsN),  m_BiasPrevChange(0.0)
     {
-        std::random_device rng;
-        std::mt19937 generator(rng());
-        std::uniform_real_distribution<double> dist(-0.5, 0.5);
+        std::mt19937 weightGenerator(seedGen->seed());
+        std::uniform_real_distribution<double> weightDist(-0.5, 0.5);
 
         for (size_t n = 0; n < weightsN; n++)
         {
-            m_Weights.push_back(dist(generator));
+            m_Weights.push_back(weightDist(weightGenerator));
         }
     }
 
-    explicit Neuron(const std::vector<double>& weights, ActivationFunctions afunc,
-        double learningRate, double momentum, double bias = 0.0) :
+    explicit Neuron(const std::vector<double>& weights, ActivationFunctions afunc, double learningRate,
+        double momentum, double bias = 0.0) :
         m_AFunc(ActivationFunction::build(afunc)), m_LearningRate(learningRate),
         m_Momentum(momentum), m_Bias(bias), m_Weights(weights),
         m_WeightsPrevChange(weights.size()), m_BiasPrevChange(0.0)
@@ -48,25 +45,25 @@ public:
             ++weightN;
         }
 
-        os << "  Bias: " << m_Bias << std::endl;
+        os << "  Bias: " << m_Bias << "\n";
     }
 
-    double calcOutput(const std::vector<double>& inputs)
+    double propagateForward(const std::vector<double>& inputs)
     {
         m_Inputs = inputs;
         double total = 0.0;
 
-        for (size_t n = 0; n < inputs.size(); n++)
-        {
-            // /!\ If more inputs than weights then exception.
-            // Should not occur as the number of weights is verified if weights are
-            // provided manually, and dimensioned accordingly if not provided.
-            total += inputs[n] * m_Weights[n];
-        }
+            for (size_t n = 0; n < inputs.size(); n++)
+            {
+                // /!\ If more inputs than weights then exception.
+                // Should not occur as the number of weights is verified if weights are
+                // provided manually, and dimensioned accordingly if not provided.
+                total += inputs[n] * m_Weights[n];
+            }
 
-        total += m_Bias;
+            total += m_Bias;
 
-        m_Output = m_AFunc->calc(total);
+            m_Output = m_AFunc->calc(total);
 
         return m_Output;
     }
@@ -98,8 +95,21 @@ public:
         m_Delta = delta;
     }
 
-    void propagateBackwardHiddenLayer(double sumWeightedDeltaNextLayer)
+    void propagateBackwardHiddenLayer(double sumWeightedDeltaNextLayer,
+        bool nextLayerIsDropout = false, double dropoutRate = 0.0, bool droppedNeuron = false)
     {
+        if (nextLayerIsDropout)
+        {
+            if (droppedNeuron)
+            {
+                m_Output = 0.0;
+            }
+            else
+            {
+                m_Output /= (1 - dropoutRate);
+            }
+        }
+
         // dE/dw = dE/do * do/dn * dn/dw = Gradient
         // dE/do = Sum(deltaOutputNeurons * w)
         // do/dn = f'(oh)
@@ -152,7 +162,7 @@ public:
             output << neuronWeight << " ";
         }
 
-        output << std::endl;
+        output << m_Bias << " \n";
     }
 
 private:

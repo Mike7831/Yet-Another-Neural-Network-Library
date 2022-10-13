@@ -1,0 +1,28 @@
+Output: [0.740326 | 0.758989]
+MSE: 0.293371
+------
+* Inputs: 2
+------
+Neurons: 2 activation: class YANNL::Logistic
+ Neuron 1
+  w1: 0.15
+  w2: 0.2
+  Bias: 0.35
+ Neuron 2
+  w3: 0.249995
+  w4: 0.29999
+  Bias: 0.349897
+------
+Neurons: 2
+Dropout layer of rate 0.4
+------
+Neurons: 2 activation: class YANNL::Logistic
+ Neuron 1
+  w5: 0.4
+  w6: 0.380164
+  Bias: 0.5298
+ Neuron 2
+  w7: 0.5
+  w8: 0.571019
+  Bias: 0.621129
+------

@@ -2,315 +2,541 @@
 #include "Utils.h"
 #include "MnistReader.h"
 
+//#include "MLP.h"
+
 #include <iomanip> // std::setprecision
 #include <cassert> // assert for testing purpose
 
 using namespace YANNL;
 
+class YANNL_UnitTests
+{
+public:
+    static void execExceptionTests()
+    {
+        std::cout << ">> Testing exception returns... ";
+        m_YANNL_UnitTest.exceptions();
+        std::cout << "done. \n";
+    }
+
+    static void execNeuralNetworkTests()
+    {
+        std::cout << ">> Testing forward propagation and mean squared error calculation " <<
+            "with a network of predefined weights... ";
+        m_YANNL_UnitTest.forwardPropAndMSErrorDefinedWeights();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing back propagation with a network of predefined weights... ";
+        m_YANNL_UnitTest.backPropDefinedWeights();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing back propagation with a dropout layer (rate = 0.4) " <<
+            "after the input layer... ";
+        m_YANNL_UnitTest.backPropDropoutInput0_4();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing back propagation with a dropout layer (rate = 1.0) " <<
+            "after the input layer... ";
+        m_YANNL_UnitTest.backPropDropoutInput1_0();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing back propagation with a dropout layer (rate = 0.4) " <<
+            "after the hidden layer... ";
+        m_YANNL_UnitTest.backPropDropoutHidden0_4();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing back propagation with a dropout layer (rate = 1.0) " <<
+            "after the hidden layer... ";
+        m_YANNL_UnitTest.backPropDropoutHidden1_0();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing back propagation with a network of predefined weights for 10000 epochs... ";
+        m_YANNL_UnitTest.backPropDefinedWeightsFor10000epochs();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing back propagation with a momentum... ";
+        m_YANNL_UnitTest.backPropMomentum();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing save and load of a neural network with predefined weights... ";
+        m_YANNL_UnitTest.saveAndLoadNetwork();
+        std::cout << "done. \n";
+    }
+
+private:
+    static YANNL_UnitTests m_YANNL_UnitTest;
+
+    void exceptions()
+    {
+        std::ostream os(nullptr);
+
+        try
+        {
+            os << "Add hidden layer after an output layer" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addOutputClassificationLayer(2);
+            net->addHiddenLayer(2, ActivationFunctions::Tanh);
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Add hidden layer with predefined weights after an output layer" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addOutputClassificationLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } });
+            net->addHiddenLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Tanh);
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Add hidden layer with inconsistent weights" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addHiddenLayer({ {0.4, 0.45}, {0.5, 0.55, 0.1} }, ActivationFunctions::Tanh);
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Add hidden layer with inconsistent weights" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addHiddenLayer({ {0.4, 0.45}, {0.5} }, ActivationFunctions::Tanh);
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Add output classification layer after an output layer" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addOutputRegressionLayer(2, ActivationFunctions::Tanh);
+            net->addOutputClassificationLayer(2);
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Add output classification layer with predefined weights after an output layer" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addOutputRegressionLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Tanh);
+            net->addOutputClassificationLayer(2);
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Add output classification layer with inconsistent weights" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addOutputClassificationLayer({ {0.4, 0.45}, {0.5, 0.55, 0.1} });
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Add output regression layer after an output layer" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addOutputRegressionLayer(2, ActivationFunctions::Tanh);
+            net->addOutputRegressionLayer(2, ActivationFunctions::Tanh);
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Add output regression layer with predefined weights after an output layer" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addOutputRegressionLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Tanh);
+            net->addOutputRegressionLayer(2, ActivationFunctions::Tanh);
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Add output regression layer with inconsistent weights" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55, 0.1} }, ActivationFunctions::Tanh);
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Propagating forward with no layers" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            os << "Output: " << net->propagateForward({ 0.05, 0.1 }) << "\n";
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Propagating forward with no output layers" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+            os << "Output: " << net->propagateForward({ 0.05, 0.1 }) << "\n";
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Propagating forward with no output layers" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+            net->addHiddenLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+            os << "Output: " << net->propagateForward({ 0.05, 0.1 }) << "\n";
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Propagating forward with inconsistent input size" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+            net->addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+            os << "Output: " << net->propagateForward({ 0.05, 0.1, 0.1 }) << "\n";
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Propagating forward with inconsistent input size" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+            net->addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+            os << "Output: " << net->propagateForward({ 0.05 }) << "\n";
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Get probable class with no output layer" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+            os << "Probable class: " << net->probableClass() << "\n";
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Calculate error with no layers" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            os << "Error: " << net->calcError({ 0.05, 0.1 }) << "\n";
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Calculate error with no output layers" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+            os << "Error: " << net->calcError({ 0.05, 0.1 }) << "\n";
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Calculate error with inconsistent output size (regression)" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+            net->addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+            os << "Error: " << net->calcError({ 0.05, 0.1, 0.1 }) << "\n";
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Calculate error with inconsistent output size (classification)" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+            net->addOutputClassificationLayer({ {0.4, 0.45}, {0.5, 0.55} }, 0.6);
+            os << "Error: " << net->calcError({ 0.05, 0.1, 0.1 }) << "\n";
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Propagate backward with no layers" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->propagateBackward({ 0.01, 0.99 });
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Propagate backward with no output layers" << "\n";
+            std::unique_ptr<NeuralNetwork> net(std::make_unique<NeuralNetwork>(2, 0.5));
+            net->addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+            net->propagateBackward({ 0.01, 0.99 });
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+
+        try
+        {
+            os << "Inaccessible file when loading network" << "\n";
+            NeuralNetwork net = NeuralNetwork::loadFromFile("dummyfile.txt");
+            net.inspect(os);
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+    }
+
+    void forwardPropAndMSErrorDefinedWeights()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile("test/" + std::string(__func__) + ".txt");
+
+        NeuralNetwork net(2, 0.5);
+        net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+        os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
+        os << "MSE: " << net.calcError({ 0.01, 0.99 }) << "\n";
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void backPropDefinedWeights()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile("test/" + std::string(__func__) + ".txt");
+
+        NeuralNetwork net(2, 0.5);
+        net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+
+        net.propagateForward({ 0.05, 0.1 });
+        net.propagateBackward({ 0.01, 0.99 });
+        net.inspect(os);
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void backPropDropoutInput0_4()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile("test/" + std::string(__func__) + ".txt");
+
+        NeuralNetwork net(2, 0.5, 0, true, 18);
+        net.addDropoutLayer(0.4);
+        net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+
+        os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
+        os << "MSE: " << net.calcError({ 0.01, 0.99 }) << "\n";
+
+        net.propagateBackward({ 0.01, 0.99 });
+        net.inspect(os);
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void backPropDropoutInput1_0()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile("test/" + std::string(__func__) + ".txt");
+
+        NeuralNetwork net(2, 0.5);
+        net.addDropoutLayer(1.0);
+        net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+
+        os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
+        os << "MSE: " << net.calcError({ 0.01, 0.99 }) << "\n";
+
+        net.propagateBackward({ 0.01, 0.99 });
+        net.inspect(os);
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void backPropDropoutHidden0_4()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile("test/" + std::string(__func__) + ".txt");
+
+        NeuralNetwork net(2, 0.5, 0, true, 18);
+        net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net.addDropoutLayer(0.4);
+        net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+
+        os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
+        os << "MSE: " << net.calcError({ 0.01, 0.99 }) << "\n";
+
+        net.propagateBackward({ 0.01, 0.99 });
+        net.inspect(os);
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void backPropDropoutHidden1_0()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile("test/" + std::string(__func__) + ".txt");
+
+        NeuralNetwork net(2, 0.5, 0, true, 18);
+        net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net.addDropoutLayer(1.0);
+        net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+
+        os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
+        os << "MSE: " << net.calcError({ 0.01, 0.99 }) << "\n";
+
+        net.propagateBackward({ 0.01, 0.99 });
+        net.inspect(os);
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void backPropDefinedWeightsFor10000epochs()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile("test/" + std::string(__func__) + ".txt");
+
+        NeuralNetwork net(2, 0.5);
+        net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+
+        for (size_t n = 0; n < 10000; n++)
+        {
+            net.propagateForward({ 0.05, 0.1 });
+            net.propagateBackward({ 0.01, 0.99 });
+
+            if (n == 0)
+            {
+                os << "Error after 1 case: " << net.calcError({ 0.01, 0.99 }) << "\n";
+            }
+        }
+
+        os << "Error after 10000 cases: " << net.calcError({ 0.01, 0.99 }) << "\n";
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void backPropMomentum()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile("test/" + std::string(__func__) + ".txt");
+
+        NeuralNetwork net(2, 0.5, 0.4);
+        net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+
+        net.inspect(os);
+
+        os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
+        os << "Error: " << net.calcError({ 0.01, 0.99 }) << "\n";
+        net.propagateBackward({ 0.01, 0.99 });
+
+        os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
+        os << "Error: " << net.calcError({ 0.01, 0.99 }) << "\n";
+        net.propagateBackward({ 0.01, 0.99 });
+        net.inspect(os);
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void saveAndLoadNetwork()
+    {
+        NeuralNetwork net1(2, 0.5);
+        net1.addDropoutLayer(0.0);
+        net1.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net1.addDropoutLayer(0.0);
+        net1.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+
+        net1.propagateForward({ 0.05, 0.1 });
+        net1.propagateBackward({ 0.01, 0.99 });
+        net1.propagateForward({ 0.05, 0.1 });
+        net1.propagateBackward({ 0.01, 0.99 });
+
+        net1.saveToFile("output/net1.txt");
+        NeuralNetwork net2 = NeuralNetwork::loadFromFile("output/net1.txt");
+        net2.saveToFile("output/net2.txt");
+
+        {
+            std::stringstream is1 = readExpectedResultFile("output/net1.txt");
+            std::stringstream is2 = readExpectedResultFile("output/net2.txt");
+
+            compareLineByLine(__func__, is1.str(), is2.str());
+        }
+
+        net1.propagateBackward({ 0.01, 0.99 });
+        net2.propagateBackward({ 0.01, 0.99 });
+        net1.saveToFile("output/net1.txt");
+        net2.saveToFile("output/net2.txt");
+        NeuralNetwork net1b = NeuralNetwork::loadFromFile("output/net1.txt");
+        NeuralNetwork net2b = NeuralNetwork::loadFromFile("output/net2.txt");
+        net1b.saveToFile("output/net1.txt");
+        net2b.saveToFile("output/net1.txt");
+
+        {
+            std::stringstream is1 = readExpectedResultFile("output/net1.txt");
+            std::stringstream is2 = readExpectedResultFile("output/net2.txt");
+
+            compareLineByLine(__func__, is1.str(), is2.str());
+        }
+    }
+
+    std::stringstream readExpectedResultFile(const std::string& filepath)
+    {
+        std::ifstream is(filepath);
+        std::stringstream buffer;
+        buffer << is.rdbuf();
+        return buffer;
+    }
+
+    void compareLineByLine(const std::string& callingFunction,
+        const std::string& s1, const std::string& s2) const
+    {
+        std::istringstream is1(s1);
+        std::istringstream is2(s2);
+        std::string l1, l2;
+        size_t lineN = 1;
+
+        while (std::getline(is1, l1))
+        {
+            std::getline(is2, l2);
+
+            if (l1 != l2)
+            {
+                std::cerr << "\n"
+                    << "Assertion failed on line " << lineN << " of " << callingFunction << ": \n"
+                    << "Provided: " << l1 << "\n"
+                    << "Expected: " << l2 << std::endl;
+                abort();
+            }
+
+            lineN++;
+        }
+    }
+};
+
+YANNL_UnitTests YANNL_UnitTests::m_YANNL_UnitTest;
+
+
 int main(int argc, char* argv[])
 {
+    YANNL_UnitTests::execExceptionTests();
+    YANNL_UnitTests::execNeuralNetworkTests();
+
     try
     {
-        // Verify exceptions thrown
-        if (false)
-        {
-            try
-            {
-                std::cout << "Add hidden layer after an output layer" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addOutputClassificationLayer(2);
-                net.addHiddenLayer(2, ActivationFunctions::Tanh);
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Add hidden layer with predefined weights after an output layer" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addOutputClassificationLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } });
-                net.addHiddenLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Tanh);
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Add hidden layer with inconsistent weights" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addHiddenLayer({ {0.4, 0.45}, {0.5, 0.55, 0.1} }, ActivationFunctions::Tanh);
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Add hidden layer with inconsistent weights" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addHiddenLayer({ {0.4, 0.45}, {0.5} }, ActivationFunctions::Tanh);
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Add output classification layer after an output layer" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addOutputRegressionLayer(2, ActivationFunctions::Tanh);
-                net.addOutputClassificationLayer(2);
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Add output classification layer with predefined weights after an output layer" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addOutputRegressionLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Tanh);
-                net.addOutputClassificationLayer(2);
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Add output classification layer with inconsistent weights" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addOutputClassificationLayer({ {0.4, 0.45}, {0.5, 0.55, 0.1} });
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Add output regression layer after an output layer" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addOutputRegressionLayer(2, ActivationFunctions::Tanh);
-                net.addOutputRegressionLayer(2, ActivationFunctions::Tanh);
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Add output regression layer with predefined weights after an output layer" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addOutputRegressionLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Tanh);
-                net.addOutputRegressionLayer(2, ActivationFunctions::Tanh);
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Add output regression layer with inconsistent weights" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55, 0.1} }, ActivationFunctions::Tanh);
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Propagating forward with no layers" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                std::cout << "Output: " << net.propagateForward({ 0.05, 0.1 }) << std::endl;
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Propagating forward with no output layers" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-                std::cout << "Output: " << net.propagateForward({ 0.05, 0.1 }) << std::endl;
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Propagating forward with no output layers" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-                net.addHiddenLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
-                std::cout << "Output: " << net.propagateForward({ 0.05, 0.1 }) << std::endl;
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Propagating forward with inconsistent input size" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-                net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
-                std::cout << "Output: " << net.propagateForward({ 0.05, 0.1, 0.1 }) << std::endl;
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Propagating forward with inconsistent input size" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-                net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
-                std::cout << "Output: " << net.propagateForward({ 0.05 }) << std::endl;
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Get probable class with no output layer" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-                std::cout << "Probable class: " << net.probableClass() << std::endl;
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Calculate error with no layers" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                std::cout << "Error: " << net.calcError({ 0.05, 0.1 }) << std::endl;
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Calculate error with no output layers" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-                std::cout << "Error: " << net.calcError({ 0.05, 0.1 }) << std::endl;
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Calculate error with inconsistent output size (regression)" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-                net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
-                std::cout << "Error: " << net.calcError({ 0.05, 0.1, 0.1 }) << std::endl;
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Calculate error with inconsistent output size (classification)" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-                net.addOutputClassificationLayer({ {0.4, 0.45}, {0.5, 0.55} }, 0.6);
-                std::cout << "Error: " << net.calcError({ 0.05, 0.1, 0.1 }) << std::endl;
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Propagate backward with no layers" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.propagateBackward({ 0.01, 0.99 });
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Propagate backward with no output layers" << std::endl;
-                NeuralNetwork net(2, 0.5);
-                net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-                net.propagateBackward({ 0.01, 0.99 });
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-
-            try
-            {
-                std::cout << "Inaccessible file when loading network" << std::endl;
-                NeuralNetwork net = NeuralNetwork::loadFromFile("dummyfile.txt");
-                net.inspect(std::cout);
-                assert(false);
-            }
-            catch (std::exception& e) { std::cout << "Exception! " << e.what() << std::endl; }
-        }
-
-        // First test with bias
-        if (true)
-        {
-            NeuralNetwork net(2, 0.5);
-            net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-            net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
-
-            net.inspect(std::cout);
-            std::cout << "Output: " << net.propagateForward({ 0.05, 0.1 }) << std::endl;
-            std::cout << "MSE: " << net.calcError({ 0.01, 0.99 }) << std::endl;
-
-            net.propagateBackward({ 0.01, 0.99 });
-            net.inspect(std::cout);
-
-            net.saveToFile("output/MM_NN_net.txt");
-        }
-
-        // With epochs
-        if (false)
-        {
-            NeuralNetwork net(2, 0.5);
-            net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-            net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
-
-            for (size_t n = 0; n < 10000; n++)
-            {
-                net.propagateForward({ 0.05, 0.1 });
-                net.propagateBackward({ 0.01, 0.99 });
-
-                if (n == 0)
-                {
-                    std::cout << "Error after 1 case: " << net.calcError({ 0.01, 0.99 }) << std::endl;
-                }
-            }
-
-            std::cout << "Error after 10000 cases: " << net.calcError({ 0.01, 0.99 }) << std::endl;
-        }
-
-        // Load first network
-        if (false)
-        {
-            const std::string path = "output/MM_NN_net.txt";
-            std::cout << "Loading neural network from file " << path << "..." << std::endl;
-            NeuralNetwork net = NeuralNetwork::loadFromFile(path);
-            std::cout << "Done." << std::endl;
-
-            net.saveToFile("output/MM_NN_net_compare.txt");
-        }
-
-        // First test with momentum and bias
-        if (false)
-        {
-            NeuralNetwork net(2, 0.5, 0.4);
-            net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-            net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
-
-            net.inspect(std::cout);
-
-            std::cout << "Output: " << net.propagateForward({ 0.05, 0.1 }) << std::endl;
-            std::cout << "Error: " << net.calcError({ 0.01, 0.99 }) << std::endl;
-            net.propagateBackward({ 0.01, 0.99 });
-
-            std::cout << "Output: " << net.propagateForward({ 0.05, 0.1 }) << std::endl;
-            std::cout << "Error: " << net.calcError({ 0.01, 0.99 }) << std::endl;
-            net.propagateBackward({ 0.01, 0.99 });
-            net.inspect(std::cout);
-            net.saveToFile("output/MM_NN_net.txt");
-        }
-
         // First test with classifier and cross-entropy
         if (false)
         {
@@ -438,7 +664,8 @@ int main(int argc, char* argv[])
             // Build neural network with 1 hidden layer of 128 and 1 output layer of 10 labels
             std::cout << "Setting up the neural network..." << std::endl;
             NeuralNetwork net(1 * 28 * 28, 0.0001, 0.4);
-            net.addHiddenLayer(128, ActivationFunctions::Relu);
+            net.addDropoutLayer(0.25);
+            net.addHiddenLayer(392, ActivationFunctions::ISRLU);
             net.addDropoutLayer(0.5);
             net.addOutputRegressionLayer(10, ActivationFunctions::Tanh);
             size_t epochN = 3;
@@ -550,8 +777,9 @@ int main(int argc, char* argv[])
                 std::cout << (n + 1) << " / " << testCount << " [ ";
                 double progress = n * 100.0 / testCount;
                 size_t position = static_cast<size_t>(progress / 100.0 * kBarWidth);
+                constexpr bool ignoreDropout = true;
 
-                net.propagateForward(testNormImages[n]);
+                net.propagateForward(testNormImages[n], ignoreDropout);
 
                 if (net.probableClass() == testLabels[n])
                 {
@@ -583,6 +811,6 @@ int main(int argc, char* argv[])
     }
     catch (std::exception& e)
     {
-        std::cout << "Exception! " << e.what() << std::endl;
+        std::cout << "Exception! " << e.what() << "\n";
     }
 }

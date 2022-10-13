@@ -4,6 +4,7 @@
 #include <iostream>     // std::ostream
 #include <vector>       // std::vector
 #include <algorithm>    // std_max_element & std::min_element
+#include <random>       // std::random_device
 #include <windows.h>    // GetConsoleCursorInfo & SetConsoleCursorInfo
 
 //! Prints a vector to the provided output stream.
@@ -98,5 +99,33 @@ void ShowConsoleCursor(bool showFlag)
     cursorInfo.bVisible = showFlag; // set the cursor visibility
     SetConsoleCursorInfo(out, &cursorInfo);
 }
+
+//! @brief Class for generating seeds. It uses itself a seed to make sure
+//! the seed sequence is always the same if the user wants it. If the
+//! user does not want to generate always the same sequence he/she can provide a custom seed.
+class SeedGenerator
+{
+public:
+    //! @param useCustomSeed Tells whether to use a custom seed
+    //! @param seed Custom seed, used only if useCustomSeed is true
+    SeedGenerator(bool useCustomSeed = false, unsigned int seed = 0)
+    {
+        if (!useCustomSeed)
+        {
+            std::random_device rng;
+            seed = rng();
+        }
+
+        mtGenerator.seed(seed);
+    }
+
+    unsigned int seed()
+    {
+        return mtGenerator();
+    }
+
+private:
+    std::mt19937 mtGenerator;
+};
 
 #endif // UTILS_H

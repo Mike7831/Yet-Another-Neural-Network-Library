@@ -1,0 +1,50 @@
+------
+* Inputs: 2
+------
+Neurons: 2 activation: class YANNL::Logistic
+ Neuron 1
+  w1: 0.15
+  w2: 0.2
+  Bias: 0.35
+ Neuron 2
+  w3: 0.25
+  w4: 0.3
+  Bias: 0.35
+------
+Neurons: 2 activation: class YANNL::Logistic
+ Neuron 1
+  w5: 0.4
+  w6: 0.45
+  Bias: 0.6
+ Neuron 2
+  w7: 0.5
+  w8: 0.55
+  Bias: 0.6
+------
+Output: [0.751365 | 0.772928]
+Error: 0.298371
+Output: [0.728442 | 0.778377]
+Error: 0.280471
+------
+* Inputs: 2
+------
+Neurons: 2 activation: class YANNL::Logistic
+ Neuron 1
+  w1: 0.149498
+  w2: 0.198995
+  Bias: 0.339955
+ Neuron 2
+  w3: 0.249425
+  w4: 0.298851
+  Bias: 0.338506
+------
+Neurons: 2 activation: class YANNL::Logistic
+ Neuron 1
+  w5: 0.300402
+  w6: 0.349805
+  Bias: 0.431992
+ Neuron 2
+  w7: 0.526631
+  w8: 0.576791
+  Bias: 0.644922
+------

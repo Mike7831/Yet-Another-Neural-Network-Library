@@ -10,17 +10,19 @@ namespace YANNL
 {
 enum class ActivationFunctions
 {
-    Logistic = 0,
-    Relu,
+    Identity = 0,
+    Logistic,
     Tanh,
-    Identity
+    ReLU,
+    ISRLU
+    
 };
 
 class ActivationFunction
 {
 public:
     static std::shared_ptr<ActivationFunction> build(ActivationFunctions afunc);
-    
+
     virtual ~ActivationFunction() = default;
 
     virtual double calc(const double& x) const = 0;
@@ -32,18 +34,18 @@ public:
     }
 };
 
+class Identity : public ActivationFunction
+{
+public:
+    double calc(const double& x) const override { return x; }
+    double calcDerivate(const double& x) const override { return 1.0; }
+};
+
 class Logistic : public ActivationFunction
 {
 public:
     double calc(const double& x) const override { return (1.0 / (1.0 + std::exp(-x))); }
     double calcDerivate(const double& x) const override { return x * (1.0 - x); }
-};
-
-class Relu : public ActivationFunction
-{
-public:
-    double calc(const double& x) const override { return std::max(0.0, x); }
-    double calcDerivate(const double& x) const override { return 0.0; }
 };
 
 class Tanh : public ActivationFunction
@@ -53,11 +55,32 @@ public:
     double calcDerivate(const double& x) const override { return 1.0 - std::pow(calc(x), 2); }
 };
 
-class Identity : public ActivationFunction
+class ReLU : public ActivationFunction
 {
 public:
-    double calc(const double& x) const override { return x; }
-    double calcDerivate(const double& x) const override { return 1.0; }
+    double calc(const double& x) const override { return std::max(0.0, x); }
+    double calcDerivate(const double& x) const override { return 0.0; }
+};
+
+class ISRLU : public ActivationFunction
+{
+public:
+    double calc(const double& x) const override
+    {
+        return (x >= 0) ?
+            x :
+            x / std::sqrt(1.0 + m_Alpha * std::pow(x, 2));
+    }
+
+    double calcDerivate(const double& x) const override
+    {
+        return (x >= 0) ?
+            1.0 :
+            std::pow(1.0 / std::sqrt(1.0 + m_Alpha * std::pow(x, 2)), 3);
+    }
+
+private:
+    const double m_Alpha = 0.1;
 };
 
 }

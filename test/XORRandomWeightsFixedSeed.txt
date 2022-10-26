@@ -1,0 +1,4 @@
+Input: [0 | 0]  Output: [0.00231658]  Expected: 0
+Input: [0 | 1]  Output: [0.995261]  Expected: 1
+Input: [1 | 0]  Output: [0.995771]  Expected: 1
+Input: [1 | 1]  Output: [0.00676803]  Expected: 0

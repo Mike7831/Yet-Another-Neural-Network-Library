@@ -2,23 +2,25 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="YANNL-vc" />
+		<Option title="YANNL-Lib" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
-			<Target title="EY_Debug">
-				<Option output="C:/Users/MDeloison/_Never Backup/Cpp/Cpp_MLP/bin/Debug/YANNL-vc" prefix_auto="1" extension_auto="1" />
-				<Option object_output="C:/Users/MDeloison/_Never Backup/Cpp/Cpp_MLP/obj/Debug/" />
-				<Option type="1" />
+			<Target title="Debug">
+				<Option output="../bin/Debug/YANNL-Lib" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="../obj/Debug/" />
+				<Option type="2" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
 			</Target>
-			<Target title="EY_Release">
-				<Option output="C:/Users/MDeloison/_Never Backup/Cpp/Cpp_MLP/bin/Release/YANNL-vc" prefix_auto="1" extension_auto="1" />
-				<Option object_output="C:/Users/MDeloison/_Never Backup/Cpp/Cpp_MLP/obj/Release/" />
-				<Option type="1" />
+			<Target title="Release">
+				<Option output="../bin/Release/YANNL-Lib" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="../obj/Release/" />
+				<Option type="2" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
@@ -39,7 +41,6 @@
 		<Unit filename="include/NeuronLayer.h" />
 		<Unit filename="include/TestRuleOfFive.h" />
 		<Unit filename="include/Utils.h" />
-		<Unit filename="main.cpp" />
 		<Unit filename="src/ActivationFunction.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />

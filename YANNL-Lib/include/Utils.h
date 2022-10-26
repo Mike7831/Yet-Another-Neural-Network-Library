@@ -124,8 +124,22 @@ public:
         return mtGenerator();
     }
 
+    friend std::ostream& operator<<(std::ostream& os, const SeedGenerator& generator);
+
+    friend std::istream& operator>>(std::istream& is, SeedGenerator& generator)
+    {
+        is >> generator.mtGenerator;
+        return is;
+    }
+
 private:
     std::mt19937 mtGenerator;
 };
+
+std::ostream& operator<<(std::ostream& os, const SeedGenerator& generator)
+{
+    os << generator.mtGenerator;
+    return os;
+}
 
 #endif // UTILS_H

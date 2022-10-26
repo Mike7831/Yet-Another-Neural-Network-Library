@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{6192d1dd-9504-455a-9ec2-c6be8739fbb6}</ProjectGuid>
-    <RootNamespace>YANNLvc</RootNamespace>
+    <ProjectGuid>{66207977-d4b9-488f-93ab-362f01900858}</ProjectGuid>
+    <RootNamespace>YANNLUnitTests</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -71,16 +71,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>include;$(IncludePath)</IncludePath>
+    <IncludePath>include;../YANNL-Lib/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>include;$(IncludePath)</IncludePath>
+    <IncludePath>include;../YANNL-Lib/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>include;$(IncludePath)</IncludePath>
+    <IncludePath>include;../YANNL-Lib/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>include;$(IncludePath)</IncludePath>
+    <IncludePath>include;../YANNL-Lib/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -139,18 +139,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\ActivationFunction.h" />
-    <ClInclude Include="include\MLP.h" />
-    <ClInclude Include="include\MnistReader.h" />
-    <ClInclude Include="include\NeuralNetwork.h" />
-    <ClInclude Include="include\Neuron.h" />
-    <ClInclude Include="include\NeuronLayer.h" />
-    <ClInclude Include="include\TestRuleOfFive.h" />
-    <ClInclude Include="include\Utils.h" />
+    <ClCompile Include="YANNL-UnitTests.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="src\ActivationFunction.cpp" />
+    <ClInclude Include="include\UnitTests.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\YANNL-Lib\YANNL-Lib.vcxproj">
+      <Project>{44c16520-90e3-451c-a972-5ba0ec251464}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

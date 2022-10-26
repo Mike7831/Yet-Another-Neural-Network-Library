@@ -3,7 +3,7 @@ MSE: 0.261316
 ------
 * Inputs: 2
 ------
-Neurons: 2 activation: class YANNL::Logistic
+Neurons: 2 activation: Logistic
  Neuron 1
   w1: 0.15
   w2: 0.2
@@ -16,7 +16,7 @@ Neurons: 2 activation: class YANNL::Logistic
 Neurons: 2
 Dropout layer of rate 1
 ------
-Neurons: 2 activation: class YANNL::Logistic
+Neurons: 2 activation: Logistic
  Neuron 1
   w5: 0.4
   w6: 0.45

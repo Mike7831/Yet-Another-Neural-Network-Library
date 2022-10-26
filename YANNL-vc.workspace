@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_workspace_file>
+	<Workspace title="Workspace">
+		<Project filename="YANNL-Lib/YANNL-Lib.cbp" />
+		<Project filename="YANNL-Main/YANNL-Main.cbp">
+			<Depends filename="YANNL-Lib/YANNL-Lib.cbp" />
+		</Project>
+		<Project filename="YANNL-UnitTests/YANNL-UnitTests.cbp">
+			<Depends filename="YANNL-Lib/YANNL-Lib.cbp" />
+		</Project>
+	</Workspace>
+</CodeBlocks_workspace_file>

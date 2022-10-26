@@ -1,0 +1,23 @@
+------
+* Inputs: 2
+------
+Neurons: 2 activation: Logistic
+ Neuron 1
+  w1: 0.150278
+  w2: 0.200555
+  Bias: 0.355553
+ Neuron 2
+  w3: 0.250277
+  w4: 0.300554
+  Bias: 0.355537
+------
+Neurons: 2 activation: Identity
+ Neuron 1
+  w5: 0.263464
+  w6: 0.312633
+  Bias: 0.369859
+ Neuron 2
+  w7: 0.636536
+  w8: 0.687367
+  Bias: 0.830141
+------

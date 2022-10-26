@@ -13,15 +13,23 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Source Files\src">
-      <UniqueIdentifier>{317d75fd-a175-450a-9677-2d00851a3ae8}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Files\include">
-      <UniqueIdentifier>{967de8c5-bb10-47f0-89cb-9ecfaa181137}</UniqueIdentifier>
+      <UniqueIdentifier>{1655366a-2a42-437c-814e-4d2aeeca034f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\src">
+      <UniqueIdentifier>{e9e698b7-0fec-4bba-be8b-479695ae947e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActivationFunction.cpp">
+      <Filter>Source Files\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="include\ActivationFunction.h">
+      <Filter>Header Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MLP.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
     <ClInclude Include="include\MnistReader.h">
@@ -42,16 +50,5 @@
     <ClInclude Include="include\Utils.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
-    <ClInclude Include="include\MLP.h">
-      <Filter>Header Files\include</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\ActivationFunction.cpp">
-      <Filter>Source Files\src</Filter>
-    </ClCompile>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

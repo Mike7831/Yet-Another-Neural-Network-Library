@@ -6,7 +6,7 @@ MSE: 0.298497
 Neurons: 2
 Dropout layer of rate 0.4
 ------
-Neurons: 2 activation: class YANNL::Logistic
+Neurons: 2 activation: Logistic
  Neuron 1
   w1: 0.15
   w2: 0.199269
@@ -16,7 +16,7 @@ Neurons: 2 activation: class YANNL::Logistic
   w4: 0.299171
   Bias: 0.345027
 ------
-Neurons: 2 activation: class YANNL::Logistic
+Neurons: 2 activation: Logistic
  Neuron 1
   w5: 0.358833
   w6: 0.408556

@@ -1,7 +1,7 @@
 ------
 * Inputs: 2
 ------
-Neurons: 2 activation: class YANNL::Logistic
+Neurons: 2 activation: Logistic
  Neuron 1
   w1: 0.15
   w2: 0.2
@@ -11,7 +11,7 @@ Neurons: 2 activation: class YANNL::Logistic
   w4: 0.3
   Bias: 0.35
 ------
-Neurons: 2 activation: class YANNL::Logistic
+Neurons: 2 activation: Logistic
  Neuron 1
   w5: 0.4
   w6: 0.45
@@ -28,7 +28,7 @@ Error: 0.280471
 ------
 * Inputs: 2
 ------
-Neurons: 2 activation: class YANNL::Logistic
+Neurons: 2 activation: Logistic
  Neuron 1
   w1: 0.149498
   w2: 0.198995
@@ -38,7 +38,7 @@ Neurons: 2 activation: class YANNL::Logistic
   w4: 0.298851
   Bias: 0.338506
 ------
-Neurons: 2 activation: class YANNL::Logistic
+Neurons: 2 activation: Logistic
  Neuron 1
   w5: 0.300402
   w6: 0.349805

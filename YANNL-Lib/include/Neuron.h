@@ -13,9 +13,9 @@ class Neuron
 public:
     explicit Neuron(size_t weightsN, ActivationFunctions afunc, double learningRate,
         double momentum, const std::shared_ptr<SeedGenerator>& seedGen, double bias = 0.0) :
-        m_AFunc(ActivationFunction::build(afunc)), m_LearningRate(learningRate),
+        m_AFunc(ActivationFunction::build(afunc)), m_AFuncID(afunc), m_LearningRate(learningRate),
         m_Momentum(momentum), m_Bias(bias),
-        m_WeightsPrevChange(weightsN),  m_BiasPrevChange(0.0)
+        m_WeightsPrevChange(weightsN),  m_BiasPrevChange(0.0), m_Inputs(weightsN)
     {
         std::mt19937 weightGenerator(seedGen->seed());
         std::uniform_real_distribution<double> weightDist(-0.5, 0.5);
@@ -28,9 +28,9 @@ public:
 
     explicit Neuron(const std::vector<double>& weights, ActivationFunctions afunc, double learningRate,
         double momentum, double bias = 0.0) :
-        m_AFunc(ActivationFunction::build(afunc)), m_LearningRate(learningRate),
+        m_AFunc(ActivationFunction::build(afunc)), m_AFuncID(afunc), m_LearningRate(learningRate),
         m_Momentum(momentum), m_Bias(bias), m_Weights(weights),
-        m_WeightsPrevChange(weights.size()), m_BiasPrevChange(0.0)
+        m_WeightsPrevChange(weights.size()), m_BiasPrevChange(0.0), m_Inputs(weights.size())
     {
 
     }
@@ -46,6 +46,31 @@ public:
         }
 
         os << "  Bias: " << m_Bias << "\n";
+    }
+
+    bool compare(const Neuron& nn, size_t& weightN) const
+    {
+        if (m_Weights.size() != nn.m_Weights.size())
+        {
+            return false;
+        }
+
+        for (size_t n = 0; n < m_Weights.size(); n++)
+        {
+            if (m_Weights[n] != nn.m_Weights[n])
+            {
+                return false;
+            }
+
+            ++weightN;
+        }
+
+        if (m_Bias != nn.m_Bias)
+        {
+            return false;
+        }
+
+        return true;
     }
 
     double propagateForward(const std::vector<double>& inputs)
@@ -157,16 +182,101 @@ public:
 
     void saveToFile(std::ofstream& output) const
     {
+        output << "[NeuronBegin] \n"
+            << "  ActivationFunction: " << static_cast<int>(m_AFuncID) << "\n"
+            << "  Momentum: " << m_Momentum << "\n" 
+            << "  LearningRate: " << m_LearningRate << "\n"
+            << "  Connections: " << m_Weights.size() << "\n"
+            << "  Weights: ";
+
         for (const auto& neuronWeight : m_Weights)
         {
             output << neuronWeight << " ";
         }
 
-        output << m_Bias << " \n";
+        output << " Bias: " << m_Bias << " ";
+
+        output << "\n"
+            << "  WeightsPrevChange: ";
+
+        for (const auto& prevChange : m_WeightsPrevChange)
+        {
+            output << prevChange << " ";
+        }
+
+        output << "  BiasPrevChange: " << m_BiasPrevChange << " ";
+
+        output << "\n"
+            << "  Inputs: ";
+
+        for (const auto& input : m_Inputs)
+        {
+            output << input << " ";
+        }
+
+        output << "\n"
+            << "  Output: " << m_Output << "\n"
+            << "  Delta: " << m_Delta << "\n"
+            << "[NeuronEnd] \n";
+    }
+
+    static Neuron readFromFile(std::ifstream& file)
+    {
+        std::string tag;
+
+        file >> tag; // NeuronBegin
+
+        int afunc = 0;
+        double momentum = 0.0;
+        double learningRate = 0.0;
+        size_t size = 0;
+        file >> tag >> afunc;
+        file >> tag >> momentum;
+        file >> tag >> learningRate;
+        file >> tag >> size;
+
+        std::vector<double> neuronWeights(size);
+        double bias = 0.0;
+
+        file >> tag; // Weights
+
+        for (size_t w = 0; w < size; w++)
+        {
+            file >> neuronWeights[w];
+        }
+
+        file >> tag >> bias;
+
+        Neuron neuron(neuronWeights, static_cast<ActivationFunctions>(afunc),
+            learningRate, momentum, bias);
+
+        file >> tag; // WeightsPrevChange
+
+        for (size_t w = 0; w < size; w++)
+        {
+            file >> neuron.m_WeightsPrevChange[w];
+        }
+
+        file >> tag >> neuron.m_BiasPrevChange;
+
+        file >> tag; // Inputs
+
+        for (size_t i = 0; i < size; i++)
+        {
+            file >> neuron.m_Inputs[i];
+        }
+
+        file >> tag >> neuron.m_Output;
+        file >> tag >> neuron.m_Delta;
+
+        file >> tag; // NeuronEnd
+
+        return neuron;
     }
 
 private:
-    std::shared_ptr<ActivationFunction> m_AFunc;
+    const std::shared_ptr<ActivationFunction> m_AFunc;
+    const ActivationFunctions m_AFuncID;
     const double m_LearningRate = 0.0;
     const double m_Momentum = 0.0;
     double m_Bias = 0.0;

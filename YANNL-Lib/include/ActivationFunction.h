@@ -5,6 +5,7 @@
 #include <cmath>    // std::exp
 #include <memory>   // std::unique_ptr & std::shared_ptr
 #include <typeinfo> // typeid
+#include <vector>   // std::vector
 
 namespace YANNL
 {
@@ -15,7 +16,7 @@ enum class ActivationFunctions
     Tanh,
     ReLU,
     ISRLU
-    
+
 };
 
 class ActivationFunction
@@ -27,11 +28,7 @@ public:
 
     virtual double calc(const double& x) const = 0;
     virtual double calcDerivate(const double& x) const = 0;
-
-    std::string name() const
-    {
-        return typeid(*this).name();
-    }
+    virtual std::string name() const = 0;
 };
 
 class Identity : public ActivationFunction
@@ -39,6 +36,7 @@ class Identity : public ActivationFunction
 public:
     double calc(const double& x) const override { return x; }
     double calcDerivate(const double& x) const override { return 1.0; }
+    std::string name() const override { return "Identity"; }
 };
 
 class Logistic : public ActivationFunction
@@ -46,6 +44,7 @@ class Logistic : public ActivationFunction
 public:
     double calc(const double& x) const override { return (1.0 / (1.0 + std::exp(-x))); }
     double calcDerivate(const double& x) const override { return x * (1.0 - x); }
+    std::string name() const override { return "Logistic"; }
 };
 
 class Tanh : public ActivationFunction
@@ -53,6 +52,7 @@ class Tanh : public ActivationFunction
 public:
     double calc(const double& x) const override { return (std::exp(x) - std::exp(-x)) / (std::exp(x) + std::exp(-x)); }
     double calcDerivate(const double& x) const override { return 1.0 - std::pow(calc(x), 2); }
+    std::string name() const override { return "Tanh"; }
 };
 
 class ReLU : public ActivationFunction
@@ -60,6 +60,7 @@ class ReLU : public ActivationFunction
 public:
     double calc(const double& x) const override { return std::max(0.0, x); }
     double calcDerivate(const double& x) const override { return 0.0; }
+    std::string name() const override { return "ReLU"; }
 };
 
 class ISRLU : public ActivationFunction
@@ -78,6 +79,8 @@ public:
             1.0 :
             std::pow(1.0 / std::sqrt(1.0 + m_Alpha * std::pow(x, 2)), 3);
     }
+
+    std::string name() const override { return "ISRLU"; }
 
 private:
     const double m_Alpha = 0.1;

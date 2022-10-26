@@ -6,9 +6,6 @@
 namespace YANNL
 {
 
-constexpr char kLayerBeginTag[] = "[LayerBegin]"; // Tag signaling the layer start when serializing
-constexpr char kLayerEndTag[] = "[LayerEnd]"; // Tag signaling the layer end when serializing
-
 class NeuralNetwork
 {
 public:
@@ -374,15 +371,21 @@ public:
             return false;
         }
 
-        output << m_Layers.size() << " " << m_Momentum << " " << m_LearningRate << " "
-            << m_InputSize << "\n";
+        output.precision(std::numeric_limits<double>::max_digits10);
+
+        output << "[NetworkBegin] \n"
+            << "LayerNumber: " << m_Layers.size() << "\n"
+            << "Momentum: " << m_Momentum << "\n"
+            << "LearningRate: " << m_LearningRate << "\n"
+            << "InputSize: " << m_InputSize << "\n"
+            << "SeedGenerator: " << *m_SeedGenerator << "\n\n";
 
         for (size_t n = 0; n < m_Layers.size(); n++)
         {
-            output << kLayerBeginTag << "\n";
             m_Layers[n]->saveToFile(output);
-            output << kLayerEndTag << "\n";
         }
+
+        output << "[NetworkEnd] \n";
 
         output.close();
 
@@ -407,6 +410,11 @@ public:
             );
         }
 
+        std::string tag;
+
+        file >> tag; // [NetworkBegin]
+        file >> tag; // LayerNumber
+
         size_t layersN = 0;
         file >> layersN;
 
@@ -420,82 +428,35 @@ public:
         double momentum = 0.0;
         double learningRate = 0.0;
         size_t inputSize = 0;
-        file >> momentum >> learningRate >> inputSize;
+        SeedGenerator generator;
+        file >> tag >> momentum;
+        file >> tag >> learningRate;
+        file >> tag >> inputSize;
+        file >> tag >> generator;
 
-        std::string marker; // #LB or #LE
-        size_t layerType = 0;
-        int afunc = 0;
-        size_t inputN = 0;
-        size_t outputN = 0;
-        double dropoutRate = 0.0;
-
-        NeuralNetwork net(inputSize, learningRate, momentum);
-
+        NeuralNetwork net(inputSize, learningRate, momentum, generator);
+        
         for (size_t l = 0; l < layersN; l++)
         {
-            file >> marker; // #LB
+            int layerType = 0;
 
-            if (marker != kLayerBeginTag)
+            file >> tag >> layerType;
+
+            if (static_cast<LayerType>(layerType) == LayerType::Hidden)
             {
-                throw std::domain_error(static_cast<const std::ostringstream&>(std::ostringstream()
-                    << "[Load network] Neural network in file " << filepath << " is ill-formed. \n"
-                    << "Expected " << kLayerBeginTag << "; read " << marker << ". "
-                    << "(Input size, Learning Rate, Momentum): " << "( " << inputSize
-                    << " , " << learningRate << " , " << momentum << " ).").str()
-                );
+                net.m_Layers.push_back(std::make_shared<HiddenLayer>(HiddenLayer::readFromFile(file)));
             }
-
-            file >> layerType;
-
-            if (static_cast<LayerType>(layerType) == LayerType::Hidden
-                || static_cast<LayerType>(layerType) == LayerType::OutputClassification
-                || static_cast<LayerType>(layerType) == LayerType::OutputRegression) // Dense hidden layer
+            else if (static_cast<LayerType>(layerType) == LayerType::Dropout)
             {
-                file >> afunc >> inputN >> outputN;
-
-                std::vector<double> neuronWeights(inputN);
-                std::vector<double> layerBias(outputN);
-                std::vector<std::vector<double>> layerWeights(outputN, neuronWeights);
-
-                for (size_t n = 0; n < outputN; n++)
-                {
-                    for (size_t w = 0; w < inputN; w++)
-                    {
-                        file >> layerWeights[n][w];
-                    }
-
-                    file >> layerBias[n];
-                }
-
-                if (static_cast<LayerType>(layerType) == LayerType::Hidden)
-                {
-                    net.addHiddenLayer(layerWeights, layerBias, static_cast<ActivationFunctions>(afunc));
-                }
-                else if (static_cast<LayerType>(layerType) == LayerType::OutputClassification)
-                {
-                    net.addOutputClassificationLayer(layerWeights, layerBias);
-                }
-                else // OutputRegression
-                {
-                    net.addOutputRegressionLayer(layerWeights, layerBias, static_cast<ActivationFunctions>(afunc));
-                }
+                net.m_Layers.push_back(std::make_shared<DropoutLayer>(DropoutLayer::readFromFile(file)));
             }
-            else if (static_cast<LayerType>(layerType) == LayerType::Dropout) // Dropout layer
+            else if (static_cast<LayerType>(layerType) == LayerType::OutputClassification)
             {
-                file >> inputN >> dropoutRate;
-                net.addDropoutLayer(dropoutRate);
+                net.m_Layers.push_back(std::make_shared<OutputClassificationLayer>(OutputClassificationLayer::readFromFile(file)));
             }
-
-            file >> marker; // #LE
-
-            if (marker != kLayerEndTag)
+            else // OutputRegression
             {
-                throw std::domain_error(static_cast<const std::ostringstream&>(std::ostringstream()
-                    << "[Load network] Neural network in file " << filepath << " is ill-formed. \n"
-                    << "Expected " << kLayerEndTag << "; read " << marker << ". "
-                    << "(Input size, Learning Rate, Momentum): " << "( " << inputSize
-                    << " , " << learningRate << " , " << momentum << " ).").str()
-                );
+                net.m_Layers.push_back(std::make_shared<OutputRegressionLayer>(OutputRegressionLayer::readFromFile(file)));
             }
         }
 
@@ -510,6 +471,14 @@ private:
     const double m_Momentum = 0.0;
     const std::shared_ptr<SeedGenerator> m_SeedGenerator;
     std::vector<std::shared_ptr<NeuronLayer>> m_Layers;
+
+    explicit NeuralNetwork(size_t inputSize, double learningRate, double momentum,
+        const SeedGenerator& generator) :
+        m_InputSize(inputSize), m_LearningRate(learningRate), m_Momentum(momentum),
+        m_SeedGenerator(std::make_shared<SeedGenerator>(generator))
+    {
+
+    }
 
     //! Adds a dense layer to the neural network with random weights.
     //! @param layerType Either OutputRegressionLayer or HiddenLayer

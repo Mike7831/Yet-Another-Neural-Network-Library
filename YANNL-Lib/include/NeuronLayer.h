@@ -201,25 +201,46 @@ public:
         }
     }
 
-    void saveToFile(std::ofstream& output, LayerType layerType) const
+    void saveToFile(std::ofstream& output, LayerType layerType,
+        const std::vector<double>* outputs = nullptr) const
     {
-        output << static_cast<int>(layerType) << " " << static_cast<int>(m_AFunc) << " ";
+        output << "LayerType: " << static_cast<int>(layerType) << "\n"
+            << "[LayerBegin] \n"
+            << "ActivationFunction: " << static_cast<int>(m_AFunc) << "\n"
+            << "Momentum: " << m_Momentum << "\n"
+            << "LearningRate: " << m_LearningRate << "\n"
+            << "InputSize: ";
 
         if (m_Neurons.size() > 0)
         {
-            output << m_Neurons[0].inputSize() << " ";
+            output << m_Neurons[0].inputSize() << "\n";
         }
         else
         {
-            output << 0 << " ";
+            output << 0 << "\n";
         }
 
-        output << m_Neurons.size() << " " << "\n";
+        output << "OutputSize: " << m_Neurons.size() << " " << "\n";
+
+        if (layerType == LayerType::OutputClassification && outputs != nullptr)
+        {
+            output << "OutputClassification: ";
+
+            std::for_each(outputs->cbegin(), outputs->cend(),
+                [&](const double& o)
+                {
+                    output << o << " ";
+                });
+
+            output << "\n";
+        }
 
         for (const Neuron& neuron : m_Neurons)
         {
             neuron.saveToFile(output);
         }
+
+        output << "[LayerEnd] \n\n";
     }
 
 protected:
@@ -227,6 +248,12 @@ protected:
     const double m_LearningRate = 0.0;
     const double m_Momentum = 0.0;
     std::vector<Neuron> m_Neurons;
+
+    explicit DenseLayer(ActivationFunctions afunc, double learningRate, double momentum) :
+        m_AFunc(afunc), m_LearningRate(learningRate), m_Momentum(momentum)
+    {
+
+    }
 };
 
 class HiddenLayer : public DenseLayer // public inheritance to be able to use std::make_shared
@@ -282,6 +309,42 @@ public:
     {
         DenseLayer::saveToFile(output, LayerType::Hidden);
     }
+
+    static HiddenLayer readFromFile(std::ifstream& file)
+    {
+        std::string tag;
+
+        file >> tag; // LayerBegin
+
+        int afunc = 0;
+        double momentum = 0.0;
+        double learningRate = 0.0;
+        size_t inputN = 0;
+        size_t outputN = 0;
+        file >> tag >> afunc;
+        file >> tag >> momentum;
+        file >> tag >> learningRate;
+        file >> tag >> inputN;
+        file >> tag >> outputN;
+
+        HiddenLayer layer(static_cast<ActivationFunctions>(afunc), learningRate, momentum);
+
+        for (size_t n = 0; n < outputN; n++)
+        {
+            layer.m_Neurons.push_back(Neuron::readFromFile(file));
+        }
+
+        file >> tag; // LayerEnd
+
+        return layer;
+    }
+
+protected:
+    explicit HiddenLayer(ActivationFunctions afunc, double learningRate, double momentum) :
+        DenseLayer(afunc, learningRate, momentum)
+    {
+
+    }
 };
 
 
@@ -291,6 +354,14 @@ public:
     explicit DropoutLayer(double rate, size_t size, const std::shared_ptr<SeedGenerator>& seedGen) :
         m_Neurons(size), m_DropoutRate(rate), m_SumDeltaNextLayer(size),
         m_Generator(seedGen->seed()), m_Dist(0.0, 1.0)
+
+    {
+
+    }
+
+    explicit DropoutLayer(double rate, size_t size, const std::mt19937& generator) :
+        m_Neurons(size), m_DropoutRate(rate), m_SumDeltaNextLayer(size),
+        m_Generator(generator), m_Dist(0.0, 1.0)
 
     {
 
@@ -400,13 +471,70 @@ public:
 
     void saveToFile(std::ofstream& output) const override
     {
-        output << static_cast<int>(LayerType::Dropout) << " " << m_Neurons.size()
-            << " " << m_DropoutRate << " " << "\n";
+        output << "LayerType: " << static_cast<int>(LayerType::Dropout) << "\n"
+            << "[LayerBegin] \n"
+            << "Size: " << m_Neurons.size() << "\n"
+            << "DropoutRate: " << m_DropoutRate << "\n"
+            << "Generator: " << m_Generator << "\n";
+
+        output << "Activations: ";
+
+        for (const auto& val : m_Neurons)
+        {
+            output << val << " ";
+        }
+
+        output << "\n"
+            << "Deltas: ";
+
+        for (const auto& delta : m_SumDeltaNextLayer)
+        {
+            output << delta << " ";
+        }
+
+        output << "\n"
+            << "[LayerEnd] \n\n";
+    }
+
+    static DropoutLayer readFromFile(std::ifstream& file)
+    {
+        std::string tag;
+
+        file >> tag; // LayerBegin
+
+        size_t sizeN = 0;
+        double rate = 0.0;
+        std::mt19937 generator;
+        file >> tag >> sizeN;
+        file >> tag >> rate;
+        file >> tag >> generator;
+
+        DropoutLayer layer(rate, sizeN, generator);
+
+        file >> tag; // Activations
+        int a;
+
+        for (size_t n = 0; n < sizeN; n++)
+        {
+            file >> a;
+            layer.m_Neurons[n] = a;
+        }
+
+        file >> tag; // Deltas
+
+        for (size_t n = 0; n < sizeN; n++)
+        {
+            file >> layer.m_SumDeltaNextLayer[n];
+        }
+
+        file >> tag; // LayerEnd
+
+        return layer;
     }
 
 private:
     std::vector<bool> m_Neurons;
-    double m_DropoutRate = 0.0;
+    const double m_DropoutRate = 0.0;
     std::vector<double> m_SumDeltaNextLayer;
 
     std::mt19937 m_Generator;
@@ -520,7 +648,50 @@ public:
 
     void saveToFile(std::ofstream& output) const override
     {
-        DenseLayer::saveToFile(output, LayerType::OutputClassification);
+        DenseLayer::saveToFile(output, LayerType::OutputClassification, &m_Outputs);
+    }
+
+    static OutputClassificationLayer readFromFile(std::ifstream& file)
+    {
+        std::string tag;
+
+        file >> tag; // LayerBegin
+
+        int afunc = 0;
+        double momentum = 0.0;
+        double learningRate = 0.0;
+        size_t inputN = 0;
+        size_t outputN = 0;
+        file >> tag >> afunc;
+        file >> tag >> momentum;
+        file >> tag >> learningRate;
+        file >> tag >> inputN;
+        file >> tag >> outputN;
+
+        OutputClassificationLayer layer(outputN, learningRate, momentum);
+
+        file >> tag; // OutputClassification
+
+        for (size_t i = 0; i < outputN; i++)
+        {
+            file >> layer.m_Outputs[i];
+        }
+
+        for (size_t n = 0; n < outputN; n++)
+        {
+            layer.m_Neurons.push_back(Neuron::readFromFile(file));
+        }
+
+        file >> tag; // LayerEnd
+
+        return layer;
+    }
+
+protected:
+    explicit OutputClassificationLayer(size_t neuronsN, double learningRate, double momentum) :
+        DenseLayer(ActivationFunctions::Identity, learningRate, momentum), m_Outputs(neuronsN)
+    {
+
     }
 
 private:
@@ -588,6 +759,42 @@ public:
     void saveToFile(std::ofstream& output) const override
     {
         DenseLayer::saveToFile(output, LayerType::OutputRegression);
+    }
+
+    static OutputRegressionLayer readFromFile(std::ifstream& file)
+    {
+        std::string tag;
+
+        file >> tag; // LayerBegin
+
+        int afunc = 0;
+        double momentum = 0.0;
+        double learningRate = 0.0;
+        size_t inputN = 0;
+        size_t outputN = 0;
+        file >> tag >> afunc;
+        file >> tag >> momentum;
+        file >> tag >> learningRate;
+        file >> tag >> inputN;
+        file >> tag >> outputN;
+
+        OutputRegressionLayer layer(static_cast<ActivationFunctions>(afunc), learningRate, momentum);
+
+        for (size_t n = 0; n < outputN; n++)
+        {
+            layer.m_Neurons.push_back(Neuron::readFromFile(file));
+        }
+
+        file >> tag; // LayerEnd
+
+        return layer;
+    }
+
+protected:
+    explicit OutputRegressionLayer(ActivationFunctions afunc, double learningRate, double momentum) :
+        DenseLayer(afunc, learningRate, momentum)
+    {
+
     }
 };
 

@@ -14,19 +14,11 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
     <Filter Include="Header Files\include">
-      <UniqueIdentifier>{e68b97e6-bf14-4990-9e20-00d16a1e9aa0}</UniqueIdentifier>
+      <UniqueIdentifier>{6b716550-1947-4005-a428-d113776eb0d4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="YANNL-UnitTests.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\UnitTests.h">
-      <Filter>Header Files\include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\TestRuleOfFive.h">
+    <ClInclude Include="include\SimpleXMLReader.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
   </ItemGroup>

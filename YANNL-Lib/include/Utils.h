@@ -61,7 +61,7 @@ std::vector<double> normalizeVect(const std::vector<T>& vect)
 //! minLabel to maxLabel. For example label 1 for minLabel = 0 and maxLabel = 3
 //! is converted to { 0, 1, 0, 0 } (4 items from 0 to 3). If the label provided
 //! is not within the range then the vector will be all set to 0s.
-//! @param label Label for which value is 1. Other labels have a 0-value.
+//! @param label The label for which value is 1. Other labels have a 0-value.
 //! @param minLabel Lower bound of the vector.
 //! @param maxLabel Upper bound of the vector.
 //! @returns Vector as illustrated in the example above.

@@ -2,7 +2,7 @@
 #include "Utils.h"
 #include "MnistReader.h"
 
-//#include "MLP.h"
+#include "SimpleXMLReader.h"
 
 #include <iomanip> // std::setprecision
 
@@ -13,40 +13,12 @@ int main(int argc, char* argv[])
 {
     try
     {
-        // Read MNIST image file
-        if (false)
+        // Read XML file
+        if (true)
         {
-            MnistReader::ImageContainer images;
-            MnistReader::MnistFileAttrs attrs;
-
-            attrs = MnistReader::readMnist("data/t10k-images.idx3-ubyte", images);
-            MnistReader::displayMnist(images, std::cout, 0, 10, attrs);
-
-            for (auto& pixel : images[0])
-            {
-                std::cout << (int)pixel << " ";
-            }
-
-            std::cout << std::endl;
-
-            MnistReader::NormalizedImageContainer normImages = MnistReader::normalize(images);
-
-            for (auto& pixel : normImages[0])
-            {
-                std::cout << pixel << " ";
-            }
-
-            std::cout << std::endl;
-        }
-
-        // Read MNIST label file
-        if (false)
-        {
-            MnistReader::LabelContainer labels;
-            int32_t count;
-
-            count = MnistReader::readMnist("data/t10k-labels.idx1-ubyte", labels);
-            MnistReader::displayMnist(labels, std::cout, 9990, 10002, count);
+            std::ifstream ifs("../output/xml.txt");
+            std::unique_ptr<XMLNode> xml = readXMLStream(ifs);
+            xml->inspect(std::cout);
         }
 
         // Read MNIST files and train network

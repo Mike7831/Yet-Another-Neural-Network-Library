@@ -4,9 +4,15 @@
 		<Project filename="YANNL-Lib/YANNL-Lib.cbp" />
 		<Project filename="YANNL-Main/YANNL-Main.cbp">
 			<Depends filename="YANNL-Lib/YANNL-Lib.cbp" />
+			<Depends filename="YANNL-MnistReader/YANNL-MnistReader.cbp" />
+			<Depends filename="YANNL-SimpleXMLReader/YANNL-SimpleXMLReader.cbp" />
 		</Project>
 		<Project filename="YANNL-UnitTests/YANNL-UnitTests.cbp">
 			<Depends filename="YANNL-Lib/YANNL-Lib.cbp" />
+			<Depends filename="YANNL-MnistReader/YANNL-MnistReader.cbp" />
+			<Depends filename="YANNL-SimpleXMLReader/YANNL-SimpleXMLReader.cbp" />
 		</Project>
+		<Project filename="YANNL-MnistReader/YANNL-MnistReader.cbp" />
+		<Project filename="YANNL-SimpleXMLReader/YANNL-SimpleXMLReader.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

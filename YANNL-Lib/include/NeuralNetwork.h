@@ -13,9 +13,9 @@ public:
     //! to then add at least one dense layer which will be the output layer.
     //! @param inputSize Number of neurons on the input layer.
     //! @param learningRate Learning rate (eta).
-    //! @param momentum Momentum (lambda). 0 by default; no momentum.
+    //! @param momentum The momentum (lambda). 0 by default; no momentum.
     //! @param useSeed Tells whether to use the provided seed (true) or random seed (false).
-    //! @param seed Seed to initialize the random function for determining weights, and
+    //! @param seed The seed to initialize the random function for determining weights, and
     //!   dropout in dropout layers.
     explicit NeuralNetwork(size_t inputSize, double learningRate, double momentum = 0.0,
         bool useSeed = false, unsigned int seed = 0) :
@@ -279,8 +279,8 @@ public:
     }
 
     //! Calculates the error between the actual output and the expected output. Mean squared
-    //! error in case the output layer is a regressor @ref OutputRegressionLayer, cross entropy
-    //! error in case the output layer is a classifier @ref OutputClassificationLayer.
+    //! error in case the output layer is regression @ref OutputRegressionLayer, cross entropy
+    //! error in case the output layer is classification @ref OutputClassificationLayer.
     //! Propagate forward first before calculating mean squared error.
     //! @param expectedOutputs Vector of expected outputs to be compared to the internal
     //!   vector of actual outputs.
@@ -572,7 +572,7 @@ private:
             }
         }
 
-        // There should be the ssame number of bias provided than outputs
+        // There should be the same number of bias provided than outputs
         if (layerWeights.size() != layerBias.size())
         {
             throw std::domain_error(static_cast<const std::ostringstream&>(std::ostringstream()

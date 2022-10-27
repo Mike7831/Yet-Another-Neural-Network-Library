@@ -72,16 +72,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>../YANNL-Lib/include;$(IncludePath)</IncludePath>
+    <IncludePath>../YANNL-MnistReader/include;../YANNL-SimpleXMLReader/include;../YANNL-Lib/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>../YANNL-Lib/include;$(IncludePath)</IncludePath>
+    <IncludePath>../YANNL-MnistReader/include;../YANNL-SimpleXMLReader/include;../YANNL-Lib/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>../YANNL-Lib/include;$(IncludePath)</IncludePath>
+    <IncludePath>../YANNL-MnistReader/include;../YANNL-SimpleXMLReader/include;../YANNL-Lib/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>../YANNL-Lib/include;$(IncludePath)</IncludePath>
+    <IncludePath>../YANNL-MnistReader/include;../YANNL-SimpleXMLReader/include;../YANNL-Lib/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -141,11 +141,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="YANNL-Main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\YANNL-Lib\YANNL-Lib.vcxproj">
-      <Project>{44c16520-90e3-451c-a972-5ba0ec251464}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

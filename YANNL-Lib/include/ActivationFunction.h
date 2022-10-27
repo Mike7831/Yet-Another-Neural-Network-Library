@@ -4,7 +4,6 @@
 #include <string>   // std::string
 #include <cmath>    // std::exp
 #include <memory>   // std::unique_ptr & std::shared_ptr
-#include <typeinfo> // typeid
 #include <vector>   // std::vector
 
 namespace YANNL
@@ -85,6 +84,32 @@ public:
 private:
     const double m_Alpha = 0.1;
 };
+
+std::shared_ptr<ActivationFunction> ActivationFunction::build(ActivationFunctions afunc)
+{
+    switch (afunc)
+    {
+    case ActivationFunctions::Logistic:
+        return std::make_shared<Logistic>();
+        break;
+
+    case ActivationFunctions::Tanh:
+        return std::make_shared<Tanh>();
+        break;
+
+    case ActivationFunctions::ReLU:
+        return std::make_shared<ReLU>();
+        break;
+
+    case ActivationFunctions::ISRLU:
+        return std::make_shared<ISRLU>();
+        break;
+
+    default:
+        return std::make_shared<Identity>();
+        break;
+    }
+}
 
 }
 

@@ -115,8 +115,8 @@ public:
 
     void propagateBackwardClassificationLayer(double delta)
     {
-        // For a classification layer the delta is caculated at layer level
-        // because serveral neuron values are necessary to calculate it.
+        // For a classification layer the delta is calculated at layer level
+        // because several neuron values are necessary to calculate it.
         m_Delta = delta;
     }
 

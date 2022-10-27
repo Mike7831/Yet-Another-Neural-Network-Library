@@ -1,0 +1,302 @@
+Dataset contains 10000 images of 28x28
+Displaying images from 0 to 10
+--- [Image 0] --- 
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+      xxxxxx                
+      xxxxxxxxxxxxxxxx      
+      xxxxxxxxxxxxxxxx      
+           xxxxxxxxxxx      
+                  xxxx      
+                 xxxx       
+                 xxxx       
+                xxxx        
+                xxxx        
+               xxxx         
+               xxx          
+              xxxx          
+             xxxx           
+            xxxxx           
+            xxxx            
+           xxxxx            
+           xxxx             
+          xxxxx             
+          xxxxx             
+          xxxx              
+                            
+------------------ 
+--- [Image 1] --- 
+                            
+                            
+                            
+          xxxxxxx           
+         xxxxxxxxx          
+        xxxxxxxxxx          
+       xxxxxx xxxx          
+       xxxx   xxxx          
+        xx    xxxx          
+             xxxxx          
+            xxxxx           
+            xxxx            
+           xxxxx            
+          xxxxx             
+          xxxx              
+         xxxxx              
+        xxxxx               
+        xxxxx               
+        xxxx                
+        xxxxxxxxx xxxxxxxxx 
+        xxxxxxxxxxxxxxxxxxx 
+        xxxxxxxxxxxxxxxxxxx 
+         xxxxxxxxxxxx       
+                            
+                            
+                            
+                            
+                            
+------------------ 
+--- [Image 2] --- 
+                            
+                            
+                            
+                            
+                xxx         
+                xxx         
+                xx          
+               xxx          
+               xxx          
+               xxx          
+              xxx           
+              xxx           
+              xxx           
+             xxxx           
+             xxx            
+             xxx            
+            xxx             
+            xxx             
+            xxx             
+            xxx             
+           xxxx             
+           xxxx             
+          xxxx              
+          xxxx              
+                            
+                            
+                            
+                            
+------------------ 
+--- [Image 3] --- 
+                            
+                            
+                            
+                            
+            xxxxx           
+            xxxxx           
+           xxxxxx           
+          xxxxxxxxx         
+          xxxxxxxxxx        
+         xxxxxxxxxxx        
+        xxxxxxxxxxxxx       
+       xxxxxxxx  xxxxxx     
+       xxxxxx     xxxxx     
+       xxxxx      xxxxx     
+       xxx        xxxxx     
+       xxx        xxxxx     
+       xxx      xxxxxxx     
+       xxx      xxxxxx      
+       xxx     xxxxxx       
+       xxxxxxxxxxxxx        
+       xxxxxxxxxxxxx        
+       xxxxxxxxxxxxx        
+        xxxxxxxxx           
+          xxxxxxx           
+                            
+                            
+                            
+                            
+------------------ 
+--- [Image 4] --- 
+                            
+                            
+                            
+                            
+                            
+          xx       xx       
+          xx       xx       
+         xxx       xxx      
+         xxx       xxx      
+        xxxx       xxx      
+        xxx       xxxx      
+       xxx        xxxx      
+       xxx       xxxx       
+      xxx        xxx        
+      xxx        xxx        
+      xxxx      xxxx        
+       xxxxxxxxxxxxx        
+       xxxxxxxxxxxxx        
+         xxxxx  xxx         
+                xxxx        
+                xxx         
+                xxx         
+                xxx         
+                xxx         
+                xx          
+                            
+                            
+                            
+------------------ 
+--- [Image 5] --- 
+                            
+                            
+                            
+                            
+                            
+                xxxx        
+               xxxxx        
+               xxxxx        
+              xxxxx         
+              xxxx          
+              xxxx          
+              xxxx          
+             xxxx           
+             xxxx           
+             xxxx           
+            xxxx            
+            xxxx            
+            xxxx            
+           xxxx             
+           xxxx             
+           xxxx             
+           xxxx             
+          xxxx              
+          xxxx              
+           xxx              
+                            
+                            
+                            
+------------------ 
+--- [Image 6] --- 
+                            
+                            
+                            
+                            
+                            
+         xxxx        xxx    
+        xxxx        xxxx    
+       xxxx         xxx     
+       xxxx        xxxx     
+      xxxx        xxxx      
+      xxxx        xxx       
+      xxxx      xxxx        
+      xxxxxxxxxxxxxx        
+      xxxxxxxxxxxxxx        
+       xxxxxxxxxxxx         
+               xxxx         
+               xxx          
+              xxxx          
+              xxx           
+              xxx           
+             xxx            
+             xxx xx         
+             xxxxxx         
+             xxxxxx         
+             xxxxx          
+                            
+                            
+                            
+------------------ 
+--- [Image 7] --- 
+                            
+                            
+                            
+                            
+                            
+                            
+           xxxx             
+          xxxxx             
+         xxxxxxx            
+         xxxxxxxxx          
+        xxxxxxxxxx          
+        xxx xxxxxxx         
+        xxx   xxxxx         
+        xxx   xxxx          
+        xxxxxxxxxxx         
+        xxxxxxxxxxx         
+         xxxxxx xxxx        
+          xxxx  xxxx        
+                 xxxx       
+                 xxxx       
+                  xxxx      
+                   xxxx     
+                   xxxx     
+                    xxx     
+                     xxx    
+                     xxx    
+                            
+                            
+------------------ 
+--- [Image 8] --- 
+                            
+                            
+                            
+                            
+                 xxxxxxxx   
+               xxxxxxxxxx   
+            xxxxxxxxxxxxx   
+            xxxxxxxxxxxxx   
+        xxx xxxxxxxxx       
+       xxxx  x xx           
+      xxxxx                 
+     xxxxx                  
+     xxxx                   
+     xxx                    
+     xxxxx                  
+     xxxxxxxxxxxxx          
+     xxxxxxxxxxxxxx         
+     xxxxxxxxxxxxxxx        
+         xxxxxxxxxxx        
+           xxxxxxxxx        
+           xxxxxxxxx        
+           xxxxxxxxx        
+            xxxxxx          
+              xxx           
+                            
+                            
+                            
+                            
+------------------ 
+--- [Image 9] --- 
+                            
+                            
+                            
+                            
+                            
+                            
+                            
+             xxxxxxx        
+           xxxxxxxxxxxx     
+         xxxxxxxxxxxxxx     
+        xxxxxxx  xxxxxxx    
+      xxxxxxx    xxxxxxx    
+      xxxxx    xxxxxxxxx    
+      xxxxxxxxxxxxxxxxx     
+      xxxxxxxxxxxxxxxx      
+        xxxxxxxxxxxxx       
+              xxxxxx        
+             xxxxx          
+            xxxxxx          
+           xxxxxx           
+           xxxxx            
+          xxxxx             
+         xxxxxx             
+         xxxxx              
+         xxxx               
+         xxxx               
+         xxx                
+                            
+------------------ 

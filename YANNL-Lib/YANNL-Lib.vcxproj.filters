@@ -16,23 +16,12 @@
     <Filter Include="Header Files\include">
       <UniqueIdentifier>{1655366a-2a42-437c-814e-4d2aeeca034f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\src">
-      <UniqueIdentifier>{e9e698b7-0fec-4bba-be8b-479695ae947e}</UniqueIdentifier>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\ActivationFunction.cpp">
-      <Filter>Source Files\src</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\ActivationFunction.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
     <ClInclude Include="include\MLP.h">
-      <Filter>Header Files\include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\MnistReader.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
     <ClInclude Include="include\NeuralNetwork.h">
@@ -42,9 +31,6 @@
       <Filter>Header Files\include</Filter>
     </ClInclude>
     <ClInclude Include="include\NeuronLayer.h">
-      <Filter>Header Files\include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\TestRuleOfFive.h">
       <Filter>Header Files\include</Filter>
     </ClInclude>
     <ClInclude Include="include\Utils.h">

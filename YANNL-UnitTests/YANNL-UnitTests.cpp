@@ -1,9 +1,5 @@
 #include "UnitTests.h"
 
-//#include "MLP.h"
-
-#include <iomanip> // std::setprecision
-
 using namespace YANNL;
 
 int main(int argc, char* argv[])
@@ -12,4 +8,5 @@ int main(int argc, char* argv[])
     tests.execExceptionTests();
     tests.execNeuralNetworkTests();
     tests.execOtherTests();
+    tests.execMnistTests();
 }

@@ -2,12 +2,18 @@
 #define YANNL_UNIT_TEST_H
 
 #include "NeuralNetwork.h"
+#include "MnistReader.h"
 #include <cassert> // assert for testing purpose
 
 using namespace YANNL;
 
 class YANNL_UnitTests
 {
+    const char* kTestDir = "../test/";
+    const char* kOutputDir = "../output/";
+    const char* kDataDir = "../data/";
+    const char* kTestFileExt = ".txt";
+    
 public:
     void execExceptionTests()
     {
@@ -100,6 +106,21 @@ public:
                 << "Exception!" << e.what() << "\n";
             abort();
         }
+    }
+
+    void execMnistTests()
+    {
+        std::cout << ">> Reading MNIST test image file and check normalization method... ";
+        MnistTestImageRead();
+        std::cout << "done. \n";
+
+        std::cout << ">> Reading MNIST test label file and check display... ";
+        MnistTestLabelRead();
+        std::cout << "done. \n";
+
+        std::cout << ">> Exception when reading a MNIST file which does not exist... ";
+        MnistTestReadException();
+        std::cout << "done. \n";
     }
 
     void execOtherTests()
@@ -346,7 +367,7 @@ private:
     void forwardPropAndMSErrorDefinedWeights()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5);
         net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
@@ -360,7 +381,7 @@ private:
     void backPropDefinedWeights()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5);
         net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
@@ -376,7 +397,7 @@ private:
     void backPropDropoutInput0_4()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5, 0, true, 18);
         net.addDropoutLayer(0.4);
@@ -395,7 +416,7 @@ private:
     void backPropDropoutInput1_0()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5);
         net.addDropoutLayer(1.0);
@@ -414,7 +435,7 @@ private:
     void backPropDropoutHidden0_4()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5, 0, true, 18);
         net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
@@ -433,7 +454,7 @@ private:
     void backPropDropoutHidden1_0()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5, 0, true, 18);
         net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
@@ -452,7 +473,7 @@ private:
     void backPropDefinedWeightsFor10000epochs()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5);
         net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
@@ -477,7 +498,7 @@ private:
     void backPropMomentum()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5, 0.4);
         net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
@@ -510,14 +531,14 @@ private:
         net1.propagateForward({ 0.05, 0.1 });
         net1.propagateBackward({ 0.01, 0.99 });
 
-        net1.saveToFile("../output/net1.txt");
+        net1.saveToFile(std::string(kOutputDir) + "net1.txt");
 
-        NeuralNetwork net2 = NeuralNetwork::loadFromFile("../output/net1.txt");
-        net2.saveToFile("../output/net2.txt");
+        NeuralNetwork net2 = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
+        net2.saveToFile(std::string(kOutputDir) + "net2.txt");
 
         {
-            std::stringstream is1 = readExpectedResultFile("../output/net1.txt");
-            std::stringstream is2 = readExpectedResultFile("../output/net2.txt");
+            std::stringstream is1 = readExpectedResultFile(std::string(kOutputDir) + "net1.txt");
+            std::stringstream is2 = readExpectedResultFile(std::string(kOutputDir) + "net2.txt");
 
             compareLineByLine(__func__, is1.str(), is2.str());
         }
@@ -525,16 +546,16 @@ private:
 
         net1.propagateBackward({ 0.01, 0.99 });
         net2.propagateBackward({ 0.01, 0.99 });
-        net1.saveToFile("../output/net1.txt");
-        net2.saveToFile("../output/net2.txt");
-        NeuralNetwork net1b = NeuralNetwork::loadFromFile("../output/net1.txt");
-        NeuralNetwork net2b = NeuralNetwork::loadFromFile("../output/net2.txt");
-        net1b.saveToFile("../output/net1.txt");
-        net2b.saveToFile("../output/net2.txt");
+        net1.saveToFile(std::string(kOutputDir) + "net1.txt");
+        net2.saveToFile(std::string(kOutputDir) + "net2.txt");
+        NeuralNetwork net1b = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
+        NeuralNetwork net2b = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net2.txt");
+        net1b.saveToFile(std::string(kOutputDir) + "net1.txt");
+        net2b.saveToFile(std::string(kOutputDir) + "net2.txt");
 
         {
-            std::stringstream is1 = readExpectedResultFile("../output/net1.txt");
-            std::stringstream is2 = readExpectedResultFile("../output/net2.txt");
+            std::stringstream is1 = readExpectedResultFile(std::string(kOutputDir) + "net1.txt");
+            std::stringstream is2 = readExpectedResultFile(std::string(kOutputDir) + "net2.txt");
 
             compareLineByLine(__func__, is1.str(), is2.str());
         }
@@ -545,10 +566,10 @@ private:
         NeuralNetwork net1(2, 0.5, 0, true, 40);
         net1.addDropoutLayer(0.4);
         net1.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-        net1.saveToFile("../output/net1.txt");
+        net1.saveToFile(std::string(kOutputDir) + "net1.txt");
 
-        NeuralNetwork net2 = NeuralNetwork::loadFromFile("../output/net1.txt");
-        net2.saveToFile("../output/net2.txt");
+        NeuralNetwork net2 = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
+        net2.saveToFile(std::string(kOutputDir) + "net2.txt");
 
         net1.addDropoutLayer(0.4);
         net1.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
@@ -561,10 +582,10 @@ private:
         net1.propagateForward({ 0.05, 0.1 }); net2.propagateForward({ 0.05, 0.1 });
         net1.propagateBackward({ 0.01, 0.99 }); net2.propagateBackward({ 0.01, 0.99 });
 
-        net1.saveToFile("../output/net1.txt");
-        net2.saveToFile("../output/net2.txt");
-        std::stringstream is1 = readExpectedResultFile("../output/net1.txt");
-        std::stringstream is2 = readExpectedResultFile("../output/net2.txt");
+        net1.saveToFile(std::string(kOutputDir) + "net1.txt");
+        net2.saveToFile(std::string(kOutputDir) + "net2.txt");
+        std::stringstream is1 = readExpectedResultFile(std::string(kOutputDir) + "net1.txt");
+        std::stringstream is2 = readExpectedResultFile(std::string(kOutputDir) + "net2.txt");
 
         compareLineByLine(__func__, is1.str(), is2.str());
     }
@@ -582,14 +603,14 @@ private:
         net1.propagateForward({ 0.05, 0.1 });
         net1.propagateBackward({ 0.01, 0.99, 0.85 });
 
-        net1.saveToFile("../output/net1.txt");
+        net1.saveToFile(std::string(kOutputDir) + "net1.txt");
 
-        NeuralNetwork net2 = NeuralNetwork::loadFromFile("../output/net1.txt");
-        net2.saveToFile("../output/net2.txt");
+        NeuralNetwork net2 = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
+        net2.saveToFile(std::string(kOutputDir) + "net2.txt");
 
         {
-            std::stringstream is1 = readExpectedResultFile("../output/net1.txt");
-            std::stringstream is2 = readExpectedResultFile("../output/net2.txt");
+            std::stringstream is1 = readExpectedResultFile(std::string(kOutputDir) + "net1.txt");
+            std::stringstream is2 = readExpectedResultFile(std::string(kOutputDir) + "net2.txt");
 
             compareLineByLine(__func__, is1.str(), is2.str());
         }
@@ -597,16 +618,16 @@ private:
 
         net1.propagateBackward({ 0.01, 0.99, 0.85 });
         net2.propagateBackward({ 0.01, 0.99, 0.85 });
-        net1.saveToFile("../output/net1.txt");
-        net2.saveToFile("../output/net2.txt");
-        NeuralNetwork net1b = NeuralNetwork::loadFromFile("../output/net1.txt");
-        NeuralNetwork net2b = NeuralNetwork::loadFromFile("../output/net2.txt");
-        net1b.saveToFile("../output/net1.txt");
-        net2b.saveToFile("../output/net2.txt");
+        net1.saveToFile(std::string(kOutputDir) + "net1.txt");
+        net2.saveToFile(std::string(kOutputDir) + "net2.txt");
+        NeuralNetwork net1b = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
+        NeuralNetwork net2b = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net2.txt");
+        net1b.saveToFile(std::string(kOutputDir) + "net1.txt");
+        net2b.saveToFile(std::string(kOutputDir) + "net2.txt");
 
         {
-            std::stringstream is1 = readExpectedResultFile("../output/net1.txt");
-            std::stringstream is2 = readExpectedResultFile("../output/net2.txt");
+            std::stringstream is1 = readExpectedResultFile(std::string(kOutputDir) + "net1.txt");
+            std::stringstream is2 = readExpectedResultFile(std::string(kOutputDir) + "net2.txt");
 
             compareLineByLine(__func__, is1.str(), is2.str());
         }
@@ -615,7 +636,7 @@ private:
     void forwardPropAndCEErrorClassificationOutput2N()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5);
         net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
@@ -629,7 +650,7 @@ private:
     void backPropClassificationOutput2N()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5);
         net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
@@ -645,7 +666,7 @@ private:
     void forwardPropAndCEErrorClassificationOutput3N()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5);
         net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
@@ -659,7 +680,7 @@ private:
     void backPropClassificationOutput3N()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5);
         net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
@@ -683,14 +704,14 @@ private:
         net1.propagateForward({ 0.05, 0.1 });
         net1.propagateBackward({ 0.01, 0.99, 0.82 });
 
-        net1.saveToFile("../output/net1.txt");
+        net1.saveToFile(std::string(kOutputDir) + "net1.txt");
 
-        NeuralNetwork net2 = NeuralNetwork::loadFromFile("../output/net1.txt");
-        net2.saveToFile("../output/net2.txt");
+        NeuralNetwork net2 = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
+        net2.saveToFile(std::string(kOutputDir) + "net2.txt");
 
         {
-            std::stringstream is1 = readExpectedResultFile("../output/net1.txt");
-            std::stringstream is2 = readExpectedResultFile("../output/net2.txt");
+            std::stringstream is1 = readExpectedResultFile(std::string(kOutputDir) + "net1.txt");
+            std::stringstream is2 = readExpectedResultFile(std::string(kOutputDir) + "net2.txt");
 
             compareLineByLine(__func__, is1.str(), is2.str());
         }
@@ -698,16 +719,16 @@ private:
 
         net1.propagateBackward({ 0.01, 0.99, 0.82 });
         net2.propagateBackward({ 0.01, 0.99, 0.82 });
-        net1.saveToFile("../output/net1.txt");
-        net2.saveToFile("../output/net2.txt");
-        NeuralNetwork net1b = NeuralNetwork::loadFromFile("../output/net1.txt");
-        NeuralNetwork net2b = NeuralNetwork::loadFromFile("../output/net2.txt");
-        net1b.saveToFile("../output/net1.txt");
-        net2b.saveToFile("../output/net2.txt");
+        net1.saveToFile(std::string(kOutputDir) + "net1.txt");
+        net2.saveToFile(std::string(kOutputDir) + "net2.txt");
+        NeuralNetwork net1b = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
+        NeuralNetwork net2b = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net2.txt");
+        net1b.saveToFile(std::string(kOutputDir) + "net1.txt");
+        net2b.saveToFile(std::string(kOutputDir) + "net2.txt");
 
         {
-            std::stringstream is1 = readExpectedResultFile("../output/net1.txt");
-            std::stringstream is2 = readExpectedResultFile("../output/net2.txt");
+            std::stringstream is1 = readExpectedResultFile(std::string(kOutputDir) + "net1.txt");
+            std::stringstream is2 = readExpectedResultFile(std::string(kOutputDir) + "net2.txt");
 
             compareLineByLine(__func__, is1.str(), is2.str());
         }
@@ -716,7 +737,7 @@ private:
     void XORRandomWeightsFixedSeed()
     {
         std::ostringstream os;
-        std::stringstream is = readExpectedResultFile("../test/" + std::string(__func__) + ".txt");
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
 
         NeuralNetwork net(2, 0.5, 0.9, true, 10); // Random weights but with a fixed seed
         net.addHiddenLayer(5, ActivationFunctions::Logistic);
@@ -741,10 +762,60 @@ private:
         {
             os << "Input: " << testSet.first
                 << "  Output: " << net.propagateForward(testSet.first)
-                << "  Expected: " << testSet.second << std::endl;
+                << "  Expected: " << testSet.second << "\n";
         }
 
         compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void MnistTestImageRead()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+
+        MnistReader::ImageContainer images;
+        MnistReader::MnistFileAttrs attrs;
+
+        attrs = MnistReader::readMnist(std::string(kDataDir) + "t10k-images.idx3-ubyte", images);
+        MnistReader::displayMnist(images, os, 0, 10, attrs);
+
+        compareLineByLine(__func__, os.str(), is.str());
+
+        MnistReader::NormalizedImageContainer normImages = MnistReader::normalize(images);
+
+        assert(*std::min_element(images[0].cbegin(), images[0].cend()) == 0);
+        assert(*std::max_element(images[0].cbegin(), images[0].cend()) == 255);
+        assert(*std::min_element(normImages[0].cbegin(), normImages[0].cend()) == 0.0);
+        assert(*std::max_element(normImages[0].cbegin(), normImages[0].cend()) == 1.0);
+    }
+
+    void MnistTestLabelRead()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+
+        MnistReader::LabelContainer labels;
+        int32_t count;
+
+        count = MnistReader::readMnist(std::string(kDataDir) + "t10k-labels.idx1-ubyte", labels);
+        MnistReader::displayMnist(labels, os, 9990, 10002, count);
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void MnistTestReadException()
+    {
+        std::ostream os(nullptr);
+
+        try
+        {
+            os << "Read MNIST file which does not exist" << "\n";
+            MnistReader::ImageContainer images;
+            MnistReader::MnistFileAttrs attrs;
+            attrs = MnistReader::readMnist("dummy.idx3-ubyte", images);
+            assert(false);
+        }
+        catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
     }
 
     std::stringstream readExpectedResultFile(const std::string& filepath)

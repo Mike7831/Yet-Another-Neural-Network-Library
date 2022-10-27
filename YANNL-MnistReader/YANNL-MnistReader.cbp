@@ -2,25 +2,25 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="YANNL-Lib" />
+		<Option title="YANNL-MnistReader" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="../bin/Debug/YANNL-Lib" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/Debug/YANNL-MnistReader" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="" />
 				<Option object_output="../obj/Debug/" />
 				<Option type="2" />
 				<Option compiler="gcc" />
+				<Option createDefFile="1" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
 			</Target>
 			<Target title="Release">
-				<Option output="../bin/Release/YANNL-Lib" prefix_auto="1" extension_auto="1" />
-				<Option working_dir="" />
+				<Option output="../bin/Release/YANNL-MnistReader" prefix_auto="1" extension_auto="1" />
 				<Option object_output="../obj/Release/" />
-				<Option type="2" />
+				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
@@ -32,13 +32,8 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add directory="include" />
 		</Compiler>
-		<Unit filename="include/ActivationFunction.h" />
-		<Unit filename="include/NeuralNetwork.h" />
-		<Unit filename="include/Neuron.h" />
-		<Unit filename="include/NeuronLayer.h" />
-		<Unit filename="include/Utils.h" />
+		<Unit filename="include/MnistReader.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

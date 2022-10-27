@@ -98,7 +98,7 @@ public:
     //! Propagates the input forward and calculates the outputs. To be specialized
     //! for output classification layer as the outputs are dependent of all the inputs.
     //! @param inputs Vector of inputs.
-    //! @param ignoreDropout Tells to ingore dropout during testing or validation.
+    //! @param ignoreDropout Tells to ignore dropout during testing or validation.
     //! @returns Vector of outputs.
     std::vector<double> propagateForward(const std::vector<double>& inputs, bool ignoreDropout) override
     {
@@ -136,7 +136,7 @@ public:
 
     //! Propagates the expected output backward to first calculate the delta on each neuron
     //! of each layer, and second to update the weights. To be specialized for output
-    //! classifcation layers.
+    //! classification layers.
     //! @param expectedOutputs Vector of expected outputs to be compared to the internal
     //!   vector of actual outputs.
     void propagateBackwardOuputLayer(const std::vector<double>& expectedOutputs) override

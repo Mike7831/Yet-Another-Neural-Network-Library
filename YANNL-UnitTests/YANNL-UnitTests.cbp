@@ -37,11 +37,11 @@
 			<Add option="-fexceptions" />
 			<Add directory="include" />
 			<Add directory="../YANNL-Lib/include" />
+			<Add directory="../YANNL-MnistReader/include" />
+			<Add directory="../YANNL-SimpleXMLReader/include" />
 		</Compiler>
-		<Linker>
-			<Add library="YANNL-Lib" />
-		</Linker>
 		<Unit filename="YANNL-UnitTests.cpp" />
+		<Unit filename="include/TestRuleOfFive.h" />
 		<Unit filename="include/UnitTests.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />

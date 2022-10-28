@@ -72,16 +72,16 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>../YANNL-MnistReader/include;../YANNL-SimpleXMLReader/include;../YANNL-Lib/include;$(IncludePath)</IncludePath>
+    <IncludePath>../YANNL-Lib/mnist-reader/include;../YANNL-Lib/neural-net/include;../YANNL-Lib/xml-reader/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>../YANNL-MnistReader/include;../YANNL-SimpleXMLReader/include;../YANNL-Lib/include;$(IncludePath)</IncludePath>
+    <IncludePath>../YANNL-Lib/mnist-reader/include;../YANNL-Lib/neural-net/include;../YANNL-Lib/xml-reader/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>../YANNL-MnistReader/include;../YANNL-SimpleXMLReader/include;../YANNL-Lib/include;$(IncludePath)</IncludePath>
+    <IncludePath>../YANNL-Lib/mnist-reader/include;../YANNL-Lib/neural-net/include;../YANNL-Lib/xml-reader/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>../YANNL-MnistReader/include;../YANNL-SimpleXMLReader/include;../YANNL-Lib/include;$(IncludePath)</IncludePath>
+    <IncludePath>../YANNL-Lib/mnist-reader/include;../YANNL-Lib/neural-net/include;../YANNL-Lib/xml-reader/include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

@@ -34,11 +34,14 @@
 			<Add option="-Wall" />
 			<Add directory="include" />
 		</Compiler>
-		<Unit filename="include/ActivationFunction.h" />
-		<Unit filename="include/NeuralNetwork.h" />
-		<Unit filename="include/Neuron.h" />
-		<Unit filename="include/NeuronLayer.h" />
-		<Unit filename="include/Utils.h" />
+		<Unit filename="mnist-reader/include/MnistReader.h" />
+		<Unit filename="neural-net/include/ActivationFunction.h" />
+		<Unit filename="neural-net/include/MLP.h" />
+		<Unit filename="neural-net/include/NeuralNetwork.h" />
+		<Unit filename="neural-net/include/Neuron.h" />
+		<Unit filename="neural-net/include/NeuronLayer.h" />
+		<Unit filename="neural-net/include/Utils.h" />
+		<Unit filename="xml-reader/include/SimpleXMLReader.h" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

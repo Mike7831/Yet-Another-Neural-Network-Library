@@ -15,10 +15,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YANNL-UnitTests", "YANNL-Un
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YANNL-Lib", "YANNL-Lib\YANNL-Lib.vcxproj", "{44C16520-90E3-451C-A972-5BA0EC251464}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YANNL-SimpleXMLReader", "YANNL-SimpleXMLReader\YANNL-SimpleXMLReader.vcxproj", "{D61A539B-2AFC-43B6-9C8D-34B04A2C9882}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "YANNL-MnistReader", "YANNL-MnistReader\YANNL-MnistReader.vcxproj", "{1E4CC6E7-2392-489F-94B1-8859F00FD1EE}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -51,22 +47,6 @@ Global
 		{44C16520-90E3-451C-A972-5BA0EC251464}.Release|x64.Build.0 = Release|x64
 		{44C16520-90E3-451C-A972-5BA0EC251464}.Release|x86.ActiveCfg = Release|Win32
 		{44C16520-90E3-451C-A972-5BA0EC251464}.Release|x86.Build.0 = Release|Win32
-		{D61A539B-2AFC-43B6-9C8D-34B04A2C9882}.Debug|x64.ActiveCfg = Debug|x64
-		{D61A539B-2AFC-43B6-9C8D-34B04A2C9882}.Debug|x64.Build.0 = Debug|x64
-		{D61A539B-2AFC-43B6-9C8D-34B04A2C9882}.Debug|x86.ActiveCfg = Debug|Win32
-		{D61A539B-2AFC-43B6-9C8D-34B04A2C9882}.Debug|x86.Build.0 = Debug|Win32
-		{D61A539B-2AFC-43B6-9C8D-34B04A2C9882}.Release|x64.ActiveCfg = Release|x64
-		{D61A539B-2AFC-43B6-9C8D-34B04A2C9882}.Release|x64.Build.0 = Release|x64
-		{D61A539B-2AFC-43B6-9C8D-34B04A2C9882}.Release|x86.ActiveCfg = Release|Win32
-		{D61A539B-2AFC-43B6-9C8D-34B04A2C9882}.Release|x86.Build.0 = Release|Win32
-		{1E4CC6E7-2392-489F-94B1-8859F00FD1EE}.Debug|x64.ActiveCfg = Debug|x64
-		{1E4CC6E7-2392-489F-94B1-8859F00FD1EE}.Debug|x64.Build.0 = Debug|x64
-		{1E4CC6E7-2392-489F-94B1-8859F00FD1EE}.Debug|x86.ActiveCfg = Debug|Win32
-		{1E4CC6E7-2392-489F-94B1-8859F00FD1EE}.Debug|x86.Build.0 = Debug|Win32
-		{1E4CC6E7-2392-489F-94B1-8859F00FD1EE}.Release|x64.ActiveCfg = Release|x64
-		{1E4CC6E7-2392-489F-94B1-8859F00FD1EE}.Release|x64.Build.0 = Release|x64
-		{1E4CC6E7-2392-489F-94B1-8859F00FD1EE}.Release|x86.ActiveCfg = Release|Win32
-		{1E4CC6E7-2392-489F-94B1-8859F00FD1EE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

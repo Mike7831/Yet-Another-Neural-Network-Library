@@ -13,28 +13,40 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\include">
-      <UniqueIdentifier>{1655366a-2a42-437c-814e-4d2aeeca034f}</UniqueIdentifier>
+    <Filter Include="Header Files\neural-net">
+      <UniqueIdentifier>{f6d08c82-ec98-43ee-87e9-7bb56fce71a8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\mnist-reader">
+      <UniqueIdentifier>{8c80ec33-4735-4cea-94eb-de8585c2a700}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\xml-reader">
+      <UniqueIdentifier>{14947d22-01c1-481a-87f4-b6c9f5203105}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\ActivationFunction.h">
-      <Filter>Header Files\include</Filter>
+    <ClInclude Include="neural-net\include\ActivationFunction.h">
+      <Filter>Header Files\neural-net</Filter>
     </ClInclude>
-    <ClInclude Include="include\MLP.h">
-      <Filter>Header Files\include</Filter>
+    <ClInclude Include="neural-net\include\MLP.h">
+      <Filter>Header Files\neural-net</Filter>
     </ClInclude>
-    <ClInclude Include="include\NeuralNetwork.h">
-      <Filter>Header Files\include</Filter>
+    <ClInclude Include="neural-net\include\NeuralNetwork.h">
+      <Filter>Header Files\neural-net</Filter>
     </ClInclude>
-    <ClInclude Include="include\Neuron.h">
-      <Filter>Header Files\include</Filter>
+    <ClInclude Include="neural-net\include\Neuron.h">
+      <Filter>Header Files\neural-net</Filter>
     </ClInclude>
-    <ClInclude Include="include\NeuronLayer.h">
-      <Filter>Header Files\include</Filter>
+    <ClInclude Include="neural-net\include\NeuronLayer.h">
+      <Filter>Header Files\neural-net</Filter>
     </ClInclude>
-    <ClInclude Include="include\Utils.h">
-      <Filter>Header Files\include</Filter>
+    <ClInclude Include="neural-net\include\Utils.h">
+      <Filter>Header Files\neural-net</Filter>
+    </ClInclude>
+    <ClInclude Include="mnist-reader\include\MnistReader.h">
+      <Filter>Header Files\mnist-reader</Filter>
+    </ClInclude>
+    <ClInclude Include="xml-reader\include\SimpleXMLReader.h">
+      <Filter>Header Files\xml-reader</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

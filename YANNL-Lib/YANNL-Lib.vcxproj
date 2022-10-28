@@ -151,12 +151,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\ActivationFunction.h" />
-    <ClInclude Include="include\MLP.h" />
-    <ClInclude Include="include\NeuralNetwork.h" />
-    <ClInclude Include="include\Neuron.h" />
-    <ClInclude Include="include\NeuronLayer.h" />
-    <ClInclude Include="include\Utils.h" />
+    <ClInclude Include="mnist-reader\include\MnistReader.h" />
+    <ClInclude Include="neural-net\include\ActivationFunction.h" />
+    <ClInclude Include="neural-net\include\MLP.h" />
+    <ClInclude Include="neural-net\include\NeuralNetwork.h" />
+    <ClInclude Include="neural-net\include\Neuron.h" />
+    <ClInclude Include="neural-net\include\NeuronLayer.h" />
+    <ClInclude Include="neural-net\include\Utils.h" />
+    <ClInclude Include="xml-reader\include\SimpleXMLReader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

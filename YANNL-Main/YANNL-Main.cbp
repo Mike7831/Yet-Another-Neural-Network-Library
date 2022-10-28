@@ -31,9 +31,9 @@
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
-			<Add directory="../YANNL-Lib/include" />
-			<Add directory="../YANNL-MnistReader/include" />
-			<Add directory="../YANNL-SimpleXMLReader/include" />
+			<Add directory="../YANNL-Lib/mnist-reader/include" />
+			<Add directory="../YANNL-Lib/neural-net/include" />
+			<Add directory="../YANNL-Lib/xml-reader/include" />
 		</Compiler>
 		<Unit filename="YANNL-Main.cpp" />
 		<Extensions>

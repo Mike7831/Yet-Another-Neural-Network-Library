@@ -21,8 +21,6 @@ enum class ActivationFunctions
 class ActivationFunction
 {
 public:
-    static std::shared_ptr<ActivationFunction> build(ActivationFunctions afunc);
-
     virtual ~ActivationFunction() = default;
 
     virtual double calc(const double& x) const = 0;
@@ -85,31 +83,35 @@ private:
     const double m_Alpha = 0.1;
 };
 
-std::shared_ptr<ActivationFunction> ActivationFunction::build(ActivationFunctions afunc)
+class ActivationFunctionFactory
 {
-    switch (afunc)
+public:
+    static std::shared_ptr<ActivationFunction> build(ActivationFunctions afunc)
     {
-    case ActivationFunctions::Logistic:
-        return std::make_shared<Logistic>();
-        break;
+        switch (afunc)
+        {
+        case ActivationFunctions::Logistic:
+            return std::make_shared<Logistic>();
+            break;
 
-    case ActivationFunctions::Tanh:
-        return std::make_shared<Tanh>();
-        break;
+        case ActivationFunctions::Tanh:
+            return std::make_shared<Tanh>();
+            break;
 
-    case ActivationFunctions::ReLU:
-        return std::make_shared<ReLU>();
-        break;
+        case ActivationFunctions::ReLU:
+            return std::make_shared<ReLU>();
+            break;
 
-    case ActivationFunctions::ISRLU:
-        return std::make_shared<ISRLU>();
-        break;
+        case ActivationFunctions::ISRLU:
+            return std::make_shared<ISRLU>();
+            break;
 
-    default:
-        return std::make_shared<Identity>();
-        break;
+        default:
+            return std::make_shared<Identity>();
+            break;
+        }
     }
-}
+};
 
 }
 

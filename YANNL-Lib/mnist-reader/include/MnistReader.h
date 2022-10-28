@@ -208,6 +208,27 @@ private:
             + (static_cast<uint32_t>(ch4));
     }
 
+    //! Performs a min-max normalization of a vector.
+    //! @param vect The vector to normalize.
+    //! @returns Normalized vector.
+    template <class T>
+    static std::vector<double> normalizeVect(const std::vector<T>& vect)
+    {
+        T max = *std::max_element(vect.begin(), vect.end());
+        T min = *std::min_element(vect.begin(), vect.end());
+        double diff = max - min;
+
+        std::vector<double> normVect;
+
+        std::for_each(vect.cbegin(), vect.cend(),
+            [&](const auto& item)
+            {
+                normVect.push_back((item - min) / diff);
+            });
+
+        return normVect;
+    }
+
     MnistReader() {};
 };
 

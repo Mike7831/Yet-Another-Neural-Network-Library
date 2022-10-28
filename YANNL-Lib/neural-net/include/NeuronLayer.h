@@ -2,7 +2,6 @@
 #define YANNL_NEURON_LAYER_H
 
 #include "Neuron.h"
-#include <sstream>  // std::ostringstream
 #include <numeric>  // std::accumulate
 
 #include <algorithm> // std::for_each in Code::Blocks
@@ -86,7 +85,7 @@ public:
     void inspect(std::ostream& os, size_t& weightN) const override
     {
         os << "Neurons: " << m_Neurons.size() << " activation: "
-            << ActivationFunction::build(m_AFunc)->name() << "\n";
+            << ActivationFunctionFactory::build(m_AFunc)->name() << "\n";
 
         for (size_t n = 0; n < m_Neurons.size(); n++)
         {
@@ -314,7 +313,7 @@ public:
     {
         std::string tag;
 
-        file >> tag; // LayerBegin
+        Utils::checkTag(file, tag, "[LayerBegin]");
 
         int afunc = 0;
         double momentum = 0.0;
@@ -334,7 +333,7 @@ public:
             layer.m_Neurons.push_back(Neuron::readFromFile(file));
         }
 
-        file >> tag; // LayerEnd
+        Utils::checkTag(file, tag, "[LayerEnd]");
 
         return layer;
     }
@@ -500,7 +499,7 @@ public:
     {
         std::string tag;
 
-        file >> tag; // LayerBegin
+        Utils::checkTag(file, tag, "[LayerBegin]");
 
         size_t sizeN = 0;
         double rate = 0.0;
@@ -511,7 +510,7 @@ public:
 
         DropoutLayer layer(rate, sizeN, generator);
 
-        file >> tag; // Activations
+        Utils::checkTag(file, tag, "Activations:");
         int a;
 
         for (size_t n = 0; n < sizeN; n++)
@@ -520,14 +519,14 @@ public:
             layer.m_Neurons[n] = a;
         }
 
-        file >> tag; // Deltas
+        Utils::checkTag(file, tag, "Deltas:");
 
         for (size_t n = 0; n < sizeN; n++)
         {
             file >> layer.m_SumDeltaNextLayer[n];
         }
 
-        file >> tag; // LayerEnd
+        Utils::checkTag(file, tag, "[LayerEnd]");
 
         return layer;
     }
@@ -655,7 +654,7 @@ public:
     {
         std::string tag;
 
-        file >> tag; // LayerBegin
+        Utils::checkTag(file, tag, "[LayerBegin]");
 
         int afunc = 0;
         double momentum = 0.0;
@@ -670,7 +669,7 @@ public:
 
         OutputClassificationLayer layer(outputN, learningRate, momentum);
 
-        file >> tag; // OutputClassification
+        Utils::checkTag(file, tag, "OutputClassification:");
 
         for (size_t i = 0; i < outputN; i++)
         {
@@ -682,7 +681,7 @@ public:
             layer.m_Neurons.push_back(Neuron::readFromFile(file));
         }
 
-        file >> tag; // LayerEnd
+        Utils::checkTag(file, tag, "[LayerEnd]");
 
         return layer;
     }
@@ -765,7 +764,7 @@ public:
     {
         std::string tag;
 
-        file >> tag; // LayerBegin
+        Utils::checkTag(file, tag, "[LayerBegin]");
 
         int afunc = 0;
         double momentum = 0.0;
@@ -785,7 +784,7 @@ public:
             layer.m_Neurons.push_back(Neuron::readFromFile(file));
         }
 
-        file >> tag; // LayerEnd
+        Utils::checkTag(file, tag, "[LayerEnd]");
 
         return layer;
     }

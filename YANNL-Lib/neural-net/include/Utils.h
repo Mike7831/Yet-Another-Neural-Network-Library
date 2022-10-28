@@ -1,11 +1,15 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef YANNL_UTILS_H
+#define YANNL_UTILS_H
 
 #include <iostream>     // std::ostream
+#include <sstream>      // std::ostringstream
 #include <vector>       // std::vector
 #include <algorithm>    // std_max_element & std::min_element
 #include <random>       // std::random_device
 #include <windows.h>    // GetConsoleCursorInfo & SetConsoleCursorInfo
+
+namespace YANNL
+{
 
 //! Prints a vector to the provided output stream.
 //! @param os Output stream to print to.
@@ -36,69 +40,91 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& vect)
     return os;
 }
 
-//! Performs a min-max normalization of a vector.
-//! @param vect The vector to normalize.
-//! @returns Normalized vector.
-template <class T>
-std::vector<double> normalizeVect(const std::vector<T>& vect)
+struct Utils
 {
-    T max = *std::max_element(vect.begin(), vect.end());
-    T min = *std::min_element(vect.begin(), vect.end());
-    double diff = max - min;
-
-    std::vector<double> normVect;
-
-    std::for_each(vect.cbegin(), vect.cend(),
-        [&](const auto& item)
-        {
-            normVect.push_back((item - min) / diff);
-        });
-
-    return normVect;
-}
-
-//! Converts a one-byte label (uint8_t) as a classification vector of size
-//! minLabel to maxLabel. For example label 1 for minLabel = 0 and maxLabel = 3
-//! is converted to { 0, 1, 0, 0 } (4 items from 0 to 3). If the label provided
-//! is not within the range then the vector will be all set to 0s.
-//! @param label The label for which value is 1. Other labels have a 0-value.
-//! @param minLabel Lower bound of the vector.
-//! @param maxLabel Upper bound of the vector.
-//! @returns Vector as illustrated in the example above.
-std::vector<double> convertLabelToVect(uint8_t label, size_t minLabel, size_t maxLabel)
-{
-    std::vector<double> output((maxLabel > minLabel ?
-        (maxLabel - minLabel) :
-        (minLabel - maxLabel)) + 1);
-
-    for (uint8_t n = 0; n <= maxLabel; n++)
+    //! Converts a one-byte label (uint8_t) as a classification vector of size
+    //! minLabel to maxLabel. For example label 1 for minLabel = 0 and maxLabel = 3
+    //! is converted to { 0, 1, 0, 0 } (4 items from 0 to 3). If the label provided
+    //! is not within the range then the vector will be all set to 0s.
+    //! @param label The label for which value is 1. Other labels have a 0-value.
+    //! @param minLabel Lower bound of the vector.
+    //! @param maxLabel Upper bound of the vector.
+    //! @returns Vector as illustrated in the example above.
+    static std::vector<double> convertLabelToVect(uint8_t label, size_t minLabel, size_t maxLabel)
     {
-        if (n == label)
+        std::vector<double> output((maxLabel > minLabel ?
+            (maxLabel - minLabel) :
+            (minLabel - maxLabel)) + 1);
+
+        for (uint8_t n = 0; n <= maxLabel; n++)
         {
-            output[n] = 1.0;
+            if (n == label)
+            {
+                output[n] = 1.0;
+            }
+            else
+            {
+                output[n] = 0.0;
+            }
         }
-        else
-        {
-            output[n] = 0.0;
-        }
+
+        return output;
     }
 
-    return output;
-}
+    //! Gives the line number of the current position in an input stream.
+    //! @param is Input (file or string) stream
+    //! @returns Line number of the current position in the input stream or
+    //!   -1 in case of error.
+    static int currentLine(std::istream& is)
+    {
+        int lineCount = 1;
+        is.clear(); // need to clear error bits otherwise returns -1.
+        auto originalPos = is.tellg();
 
-//! Show or hide the console cursor to avoid it blinking when updating the
-//! console output fast.
-//! @param showFlag True to show the cursor, false to hide.
-void ShowConsoleCursor(bool showFlag)
-{
-    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (originalPos < 0)
+        {
+            return -1;
+        }
 
-    CONSOLE_CURSOR_INFO cursorInfo;
+        is.seekg(0);
+        char c;
 
-    GetConsoleCursorInfo(out, &cursorInfo);
-    cursorInfo.bVisible = showFlag; // set the cursor visibility
-    SetConsoleCursorInfo(out, &cursorInfo);
-}
+        while ((is.tellg() < originalPos) && is.get(c))
+        {
+            if (c == '\n') ++lineCount;
+        }
+
+        return lineCount;
+    }
+
+    //! Show or hide the console cursor to avoid it blinking when updating the
+    //! console output fast.
+    //! @param showFlag True to show the cursor, false to hide.
+    static void ShowConsoleCursor(bool showFlag)
+    {
+        HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
+
+        CONSOLE_CURSOR_INFO cursorInfo;
+
+        GetConsoleCursorInfo(out, &cursorInfo);
+        cursorInfo.bVisible = showFlag; // set the cursor visibility
+        SetConsoleCursorInfo(out, &cursorInfo);
+    }
+
+    static void checkTag(std::istream& ifs, std::string& tag, const std::string& expectedTag)
+    {
+        ifs >> tag;
+
+        if (tag != expectedTag)
+        {
+            throw std::domain_error(static_cast<const std::ostringstream&>(std::ostringstream()
+                << "[Load network] Neural network input file is ill-formed. Expected: "
+                << expectedTag << " " << " Provided: " << tag << " "
+                << "at line " << currentLine(ifs) << ".").str()
+            );
+        }
+    }
+};
 
 //! @brief Class for generating seeds. It uses itself a seed to make sure
 //! the seed sequence is always the same if the user wants it. If the
@@ -124,7 +150,11 @@ public:
         return mtGenerator();
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const SeedGenerator& generator);
+    friend std::ostream& operator<<(std::ostream& os, const SeedGenerator& generator)
+    {
+        os << generator.mtGenerator;
+        return os;
+    }
 
     friend std::istream& operator>>(std::istream& is, SeedGenerator& generator)
     {
@@ -136,10 +166,6 @@ private:
     std::mt19937 mtGenerator;
 };
 
-std::ostream& operator<<(std::ostream& os, const SeedGenerator& generator)
-{
-    os << generator.mtGenerator;
-    return os;
 }
 
-#endif // UTILS_H
+#endif // YANNL_UTILS_H

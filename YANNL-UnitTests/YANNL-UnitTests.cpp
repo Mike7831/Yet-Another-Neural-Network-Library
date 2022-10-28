@@ -9,4 +9,5 @@ int main(int argc, char* argv[])
     tests.execNeuralNetworkTests();
     tests.execOtherTests();
     tests.execMnistTests();
+    tests.execXMLTests();
 }

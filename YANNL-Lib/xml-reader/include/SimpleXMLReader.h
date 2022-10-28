@@ -3,7 +3,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <iostream>
 #include <vector>
 #include <map>
 #include <memory>   // std::unique_ptr & std::shared_ptr
@@ -30,7 +29,8 @@ enum class XMLState
     InOpeningTagAttribute,
     InOpeningTagAttributeValue,
     InClosingTagAttributes,
-    InValue
+    InValue,
+    InComment
 };
 
 struct XMLNode
@@ -55,7 +55,7 @@ struct XMLNode
 
         if (children.empty())
         {
-            os << value << "</" << name << "> \n";
+            os << value << "</" << name << ">\n";
         }
         else
         {
@@ -72,7 +72,7 @@ struct XMLNode
                     child->inspect(os, indent + 2);
                 });
 
-            os << std::string(indent, ' ') << "</" << name << "> \n";
+            os << std::string(indent, ' ') << "</" << name << ">\n";
         }
     }
 
@@ -94,18 +94,20 @@ struct XMLNode
             path += delimiter;
         }
 
-        size_t pos = 0, index = 0;
+        size_t pos = 0;
         std::string token;
 
         if ((pos = path.find(delimiter)) != std::string::npos
-            && (token = path.substr(0, pos)) == curNode->name)
+            && path.substr(0, pos) == curNode->name)
         {
+            // Check whether it is at the right place, i.e. the top node provided is
+            // the current node. Once done, remove it from the hierarchy.
             path.erase(0, pos + 1);
 
-            while ((pos = path.find(delimiter)) != std::string::npos && curNode != nullptr)
+            while ((pos = path.find(delimiter)) != std::string::npos)
             {
                 token = path.substr(0, pos);
-                index = 0;
+                size_t index = 0;
 
                 size_t indexB = token.find_first_of('[');
                 size_t indexE = token.find_first_of(']');
@@ -165,18 +167,18 @@ struct XMLNode
             path += delimiter;
         }
 
-        size_t pos = 0, index = 0;
+        size_t pos = 0;
         std::string token;
 
         if ((pos = path.find(delimiter)) != std::string::npos
-            && (token = path.substr(0, pos)) == curNode->name)
+            && path.substr(0, pos) == curNode->name)
         {
             path.erase(0, pos + 1);
 
-            while ((pos = path.find(delimiter)) != std::string::npos && curNode != nullptr)
+            while ((pos = path.find(delimiter)) != std::string::npos)
             {
                 token = path.substr(0, pos);
-                index = 0;
+                size_t index = 0;
 
                 size_t indexB = token.find_first_of('[');
                 size_t indexE = token.find_first_of(']');
@@ -205,7 +207,7 @@ struct XMLNode
 
                             n++;
                         }
-                        else if (lastElement)
+                        else // if (lastElement)
                         {
                             if (indexFound)
                             {
@@ -218,7 +220,7 @@ struct XMLNode
 
                                 n++;
                             }
-                            else if (!indexFound)
+                            else // if (!indexFound)
                             {
                                 // e.g. /network/layers/layer[1]/neurons
                                 // No index provided: add all the nodes
@@ -236,7 +238,7 @@ struct XMLNode
     }
 };
 
-std::unique_ptr<XMLNode> readXMLStream(std::ifstream& ifs)
+std::unique_ptr<XMLNode> readXMLStream(std::istream& ifs)
 {
     std::string line, tag, attr, value;
     std::map<std::string, std::string> attrs;
@@ -261,7 +263,6 @@ std::unique_ptr<XMLNode> readXMLStream(std::ifstream& ifs)
                 switch (c)
                 {
                 case '<':
-                    std::cout << "Tag opening \n";
                     state = XMLState::InOpeningTag;
                     break;
                 }
@@ -272,8 +273,6 @@ std::unique_ptr<XMLNode> readXMLStream(std::ifstream& ifs)
                 switch (c)
                 {
                 case '>':
-                    std::cout << "Tag closing: <" << tag << "> \n";
-
                     if (xml.get() == nullptr)
                     {
                         xml = std::make_unique<XMLNode>();
@@ -291,7 +290,7 @@ std::unique_ptr<XMLNode> readXMLStream(std::ifstream& ifs)
                         curNode->attributes = attrs;
                     }
 
-                    attrs.clear();
+                    attrs.clear(); attr.clear();
                     tag.clear();
                     state = XMLState::InValue;
                     break;
@@ -300,8 +299,16 @@ std::unique_ptr<XMLNode> readXMLStream(std::ifstream& ifs)
                     state = XMLState::InClosingTag;
                     break;
 
+                case '!':
+                    if (tag.empty())
+                    {
+                        // ! is the immediate character after <
+                        state = XMLState::InComment;
+                    }
+
+                    break;
+
                 case ' ':
-                    std::cout << "Looking for attributes \n";
                     state = XMLState::InOpeningTagAttributes;
                     break;
 
@@ -316,8 +323,6 @@ std::unique_ptr<XMLNode> readXMLStream(std::ifstream& ifs)
                 switch (c)
                 {
                 case '>':
-                    std::cout << "Tag closing: </" << tag << "> \n";
-
                     if (curNode->name != tag)
                     {
                         throw std::domain_error(static_cast<const std::ostringstream&>(std::ostringstream()
@@ -333,7 +338,6 @@ std::unique_ptr<XMLNode> readXMLStream(std::ifstream& ifs)
                     break;
 
                 case ' ':
-                    std::cout << "Ignoring attributes \n";
                     state = XMLState::InClosingTagAttributes;
                     break;
 
@@ -423,15 +427,23 @@ std::unique_ptr<XMLNode> readXMLStream(std::ifstream& ifs)
                 switch (c)
                 {
                 case '<':
-                    std::cout << "Value: " << trim(value) << "\n";
                     curNode->value = trim(value);
                     value.clear();
-                    std::cout << "Tag opening \n";
                     state = XMLState::InOpeningTag;
                     break;
 
                 default:
                     value += c;
+                    break;
+                }
+
+                break;
+
+            case XMLState::InComment:
+                switch (c)
+                {
+                case '>':
+                    state = XMLState::InValue;
                     break;
                 }
 

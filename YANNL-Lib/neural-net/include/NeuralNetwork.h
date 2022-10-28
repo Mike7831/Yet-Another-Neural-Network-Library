@@ -397,7 +397,8 @@ public:
     //! @param filepath Path to the file containing the serialized neural network to load.
     //! @returns The reconstructed neural network.
     //! @throws std::ifstream::failure In case the file is not accessible.
-    //! @throws std::domain_error In case the neural network has no layers, thus no output layers.
+    //! @throws std::domain_error In case the neural network has no layers, thus
+    //!   no output layers, or if it is ill-formed i.e. not the expected tags.
     static NeuralNetwork loadFromFile(const std::string& filepath)
     {
         std::ifstream file(filepath);
@@ -412,7 +413,7 @@ public:
 
         std::string tag;
 
-        file >> tag; // [NetworkBegin]
+        Utils::checkTag(file, tag, "[NetworkBegin]");
         file >> tag; // LayerNumber
 
         size_t layersN = 0;
@@ -435,7 +436,7 @@ public:
         file >> tag >> generator;
 
         NeuralNetwork net(inputSize, learningRate, momentum, generator);
-        
+
         for (size_t l = 0; l < layersN; l++)
         {
             int layerType = 0;
@@ -444,19 +445,27 @@ public:
 
             if (static_cast<LayerType>(layerType) == LayerType::Hidden)
             {
-                net.m_Layers.push_back(std::make_shared<HiddenLayer>(HiddenLayer::readFromFile(file)));
+                net.m_Layers.push_back(
+                    std::make_shared<HiddenLayer>(
+                        HiddenLayer::readFromFile(file)));
             }
             else if (static_cast<LayerType>(layerType) == LayerType::Dropout)
             {
-                net.m_Layers.push_back(std::make_shared<DropoutLayer>(DropoutLayer::readFromFile(file)));
+                net.m_Layers.push_back(
+                    std::make_shared<DropoutLayer>(
+                        DropoutLayer::readFromFile(file)));
             }
             else if (static_cast<LayerType>(layerType) == LayerType::OutputClassification)
             {
-                net.m_Layers.push_back(std::make_shared<OutputClassificationLayer>(OutputClassificationLayer::readFromFile(file)));
+                net.m_Layers.push_back(
+                    std::make_shared<OutputClassificationLayer>(
+                        OutputClassificationLayer::readFromFile(file)));
             }
-            else // OutputRegression
+            else // OutputRegressionLayer
             {
-                net.m_Layers.push_back(std::make_shared<OutputRegressionLayer>(OutputRegressionLayer::readFromFile(file)));
+                net.m_Layers.push_back(
+                    std::make_shared<OutputRegressionLayer>(
+                        OutputRegressionLayer::readFromFile(file)));
             }
         }
 

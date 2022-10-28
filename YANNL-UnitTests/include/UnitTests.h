@@ -3,6 +3,7 @@
 
 #include "NeuralNetwork.h"
 #include "MnistReader.h"
+#include "SimpleXMLReader.h"
 #include <cassert> // assert for testing purpose
 
 using namespace YANNL;
@@ -103,7 +104,7 @@ public:
         catch (std::exception& e)
         {
             std::cout << "\n"
-                << "Exception!" << e.what() << "\n";
+                << "Exception! " << e.what() << "\n";
             abort();
         }
     }
@@ -128,6 +129,13 @@ public:
         std::cout << ">> Testing a neural network simulating an XOR gate with random "
             "weights but fixed seed... ";
         XORRandomWeightsFixedSeed();
+        std::cout << "done. \n";
+    }
+
+    void execXMLTests()
+    {
+        std::cout << ">> Reading XML file, saving it and comparing it... ";
+        xmlReadAndSave();
         std::cout << "done. \n";
     }
 
@@ -816,6 +824,18 @@ private:
             assert(false);
         }
         catch (std::exception& e) { os << "Exception! " << e.what() << "\n"; }
+    }
+
+    void xmlReadAndSave()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+        std::ifstream ifs(std::ifstream(kTestDir + std::string(__func__) + ".xml"));
+
+        std::unique_ptr<XMLNode> xml = readXMLStream(ifs);
+        xml->inspect(os);
+
+        compareLineByLine(__func__, os.str(), is.str());
     }
 
     std::stringstream readExpectedResultFile(const std::string& filepath)

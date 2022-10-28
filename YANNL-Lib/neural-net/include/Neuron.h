@@ -13,7 +13,7 @@ class Neuron
 public:
     explicit Neuron(size_t weightsN, ActivationFunctions afunc, double learningRate,
         double momentum, const std::shared_ptr<SeedGenerator>& seedGen, double bias = 0.0) :
-        m_AFunc(ActivationFunction::build(afunc)), m_AFuncID(afunc), m_LearningRate(learningRate),
+        m_AFunc(ActivationFunctionFactory::build(afunc)), m_AFuncID(afunc), m_LearningRate(learningRate),
         m_Momentum(momentum), m_Bias(bias),
         m_WeightsPrevChange(weightsN),  m_BiasPrevChange(0.0), m_Inputs(weightsN)
     {
@@ -28,7 +28,7 @@ public:
 
     explicit Neuron(const std::vector<double>& weights, ActivationFunctions afunc, double learningRate,
         double momentum, double bias = 0.0) :
-        m_AFunc(ActivationFunction::build(afunc)), m_AFuncID(afunc), m_LearningRate(learningRate),
+        m_AFunc(ActivationFunctionFactory::build(afunc)), m_AFuncID(afunc), m_LearningRate(learningRate),
         m_Momentum(momentum), m_Bias(bias), m_Weights(weights),
         m_WeightsPrevChange(weights.size()), m_BiasPrevChange(0.0), m_Inputs(weights.size())
     {
@@ -224,7 +224,7 @@ public:
     {
         std::string tag;
 
-        file >> tag; // NeuronBegin
+        Utils::checkTag(file, tag, "[NeuronBegin]");
 
         int afunc = 0;
         double momentum = 0.0;
@@ -238,7 +238,7 @@ public:
         std::vector<double> neuronWeights(size);
         double bias = 0.0;
 
-        file >> tag; // Weights
+        Utils::checkTag(file, tag, "Weights:");
 
         for (size_t w = 0; w < size; w++)
         {
@@ -250,7 +250,7 @@ public:
         Neuron neuron(neuronWeights, static_cast<ActivationFunctions>(afunc),
             learningRate, momentum, bias);
 
-        file >> tag; // WeightsPrevChange
+        Utils::checkTag(file, tag, "WeightsPrevChange:");
 
         for (size_t w = 0; w < size; w++)
         {
@@ -259,7 +259,7 @@ public:
 
         file >> tag >> neuron.m_BiasPrevChange;
 
-        file >> tag; // Inputs
+        Utils::checkTag(file, tag, "Inputs:");
 
         for (size_t i = 0; i < size; i++)
         {
@@ -269,7 +269,7 @@ public:
         file >> tag >> neuron.m_Output;
         file >> tag >> neuron.m_Delta;
 
-        file >> tag; // NeuronEnd
+        Utils::checkTag(file, tag, "[NeuronEnd]");
 
         return neuron;
     }

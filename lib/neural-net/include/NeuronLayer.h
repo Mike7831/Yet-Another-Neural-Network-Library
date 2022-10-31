@@ -22,6 +22,7 @@ public:
     virtual size_t size() const = 0;
     virtual LayerType type() const = 0;
     virtual void inspect(std::ostream& os, size_t& weightN) const = 0;
+    virtual void updateLearningRate(double learningRate) = 0;
     virtual std::vector<double> propagateForward(const std::vector<double>& inputs, bool ignoreDropout) = 0;
     virtual size_t probableClass() const = 0;
     virtual double calcError(const std::vector<double>& expectedOutputs) const = 0;
@@ -92,6 +93,17 @@ public:
             os << " Neuron " << (n + 1) << "\n";
             m_Neurons[n].inspect(os, weightN);
         }
+    }
+
+    void updateLearningRate(double learningRate) override
+    {
+        m_LearningRate = learningRate;
+
+        std::for_each(m_Neurons.begin(), m_Neurons.end(),
+            [&](Neuron& neuron)
+            {
+                neuron.updateLearningRate(learningRate);
+            });
     }
 
     //! Propagates the input forward and calculates the outputs. To be specialized
@@ -244,7 +256,7 @@ public:
 
 protected:
     const ActivationFunctions m_AFunc;
-    const double m_LearningRate = 0.0;
+    double m_LearningRate = 0.0;
     const double m_Momentum = 0.0;
     std::vector<Neuron> m_Neurons;
 
@@ -382,6 +394,11 @@ public:
     {
         os << "Neurons: " << m_Neurons.size() << "\n"
             << "Dropout layer of rate " << m_DropoutRate << "\n";
+    }
+
+    void updateLearningRate(double learningRate) override
+    {
+
     }
 
     std::vector<double> propagateForward(const std::vector<double>& inputs, bool ignoreDropout) override

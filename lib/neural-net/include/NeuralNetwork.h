@@ -225,6 +225,17 @@ public:
         }
     }
 
+    void updateLearningRate(double learningRate)
+    {
+        m_LearningRate = learningRate;
+
+        std::for_each(m_Layers.begin(), m_Layers.end(),
+            [&](const std::shared_ptr<NeuronLayer>& layer)
+            {
+                layer->updateLearningRate(learningRate);
+            });
+    }
+
     //! Propagates the provided input forward through all the neural network and calculates
     //! the output. This is a prerequisite to calculating the mean squared error or
     //! propagating backward.
@@ -312,6 +323,17 @@ public:
         {
             return m_Layers.back()->calcError(expectedOutputs) / m_Layers.back()->size();
         }
+    }
+
+    //! Converts the single-value expected output to a vector and calls
+    //! the @ref calcError(const std::vector<double>&)
+    //! @param expectedOutput Single-value output expected.
+    //! @returns See @ref calcError(const std::vector<double>&)
+    //! @throws See @ref calcError(const std::vector<double>&)
+    double calcError(double expectedOutput)
+    {
+        const std::vector<double> expectedOutputs{ expectedOutput };
+        return calcError(expectedOutputs);
     }
 
     //! Propagates the expected output backward to first calculate the delta on each neuron
@@ -476,7 +498,7 @@ public:
 
 private:
     const size_t m_InputSize = 0;
-    const double m_LearningRate = 0.0;
+    double m_LearningRate = 0.0;
     const double m_Momentum = 0.0;
     const std::shared_ptr<SeedGenerator> m_SeedGenerator;
     std::vector<std::shared_ptr<NeuronLayer>> m_Layers;

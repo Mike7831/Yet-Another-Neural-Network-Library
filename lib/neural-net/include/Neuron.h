@@ -48,29 +48,9 @@ public:
         os << "  Bias: " << m_Bias << "\n";
     }
 
-    bool compare(const Neuron& nn, size_t& weightN) const
+    void updateLearningRate(double learningRate)
     {
-        if (m_Weights.size() != nn.m_Weights.size())
-        {
-            return false;
-        }
-
-        for (size_t n = 0; n < m_Weights.size(); n++)
-        {
-            if (m_Weights[n] != nn.m_Weights[n])
-            {
-                return false;
-            }
-
-            ++weightN;
-        }
-
-        if (m_Bias != nn.m_Bias)
-        {
-            return false;
-        }
-
-        return true;
+        m_LearningRate = learningRate;
     }
 
     double propagateForward(const std::vector<double>& inputs)
@@ -277,7 +257,7 @@ public:
 private:
     const std::shared_ptr<ActivationFunction> m_AFunc;
     const ActivationFunctions m_AFuncID;
-    const double m_LearningRate = 0.0;
+    double m_LearningRate = 0.0;
     const double m_Momentum = 0.0;
     double m_Bias = 0.0;
     std::vector<double> m_Weights;

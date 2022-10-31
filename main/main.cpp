@@ -36,8 +36,21 @@ int main(int argc, char* argv[])
                 << "  Expected: " << testSet.second << "\n";
         }
 
-        MLPRegressor mlp({ 5 }, ActivationFunctions::Logistic, Solvers::SGD, LearningRate::Constant,
-            0.5, 0.5, 10000, true, 10, 1.0E-4, 0.9, 10);
+        MLPRegressor mlp({ 5 },             // hidden_layer_sizes
+            ActivationFunctions::Logistic,  // activation
+            Solvers::SGD,                   // solver
+            LearningRate::Adaptive,         // learning_rate
+            0.5,                            // learning_rate_init
+            0.5,                            // power_t
+            10000,                          // max_iter
+            true,                           // use_random_state
+            10,                             // random_state
+            1.0E-4,                         // tol
+            true,                           // verbose
+            0.9,                            // momentum
+            true,                           // early_stopping
+            10                              // n_iter_no_change
+        );
         mlp.fit({ {0, 0},  {0, 1},  {1, 0},  {1, 1} }, { 0, 1, 1, 0 });
 
         std::cout << "With the MLPRegressor: \n";

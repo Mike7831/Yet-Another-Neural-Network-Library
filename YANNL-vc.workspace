@@ -5,7 +5,7 @@
 		<Project filename="main/YANNL-main.cbp">
 			<Depends filename="lib/YANNL-lib.cbp" />
 		</Project>
-		<Project filename="YANNL-test/YANNL-test.cbp">
+		<Project filename="test/YANNL-test.cbp">
 			<Depends filename="lib/YANNL-lib.cbp" />
 		</Project>
 	</Workspace>

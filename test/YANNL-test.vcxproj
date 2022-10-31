@@ -24,6 +24,7 @@
     <ProjectGuid>{66207977-d4b9-488f-93ab-362f01900858}</ProjectGuid>
     <RootNamespace>YANNLUnitTests</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>test</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -71,16 +72,22 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>include;../YANNL-Lib/mnist-reader/include;../YANNL-Lib/neural-net/include;../YANNL-Lib/xml-reader/include;$(IncludePath)</IncludePath>
+    <IncludePath>include;../lib/mnist-reader/include;../lib/neural-net/include;../lib/xml-reader/include;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>include;../YANNL-Lib/mnist-reader/include;../YANNL-Lib/neural-net/include;../YANNL-Lib/xml-reader/include;$(IncludePath)</IncludePath>
+    <IncludePath>include;../lib/mnist-reader/include;../lib/neural-net/include;../lib/xml-reader/include;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>include;../YANNL-Lib/mnist-reader/include;../YANNL-Lib/neural-net/include;../YANNL-Lib/xml-reader/include;$(IncludePath)</IncludePath>
+    <IncludePath>include;../lib/mnist-reader/include;../lib/neural-net/include;../lib/xml-reader/include;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>include;../YANNL-Lib/mnist-reader/include;../YANNL-Lib/neural-net/include;../YANNL-Lib/xml-reader/include;$(IncludePath)</IncludePath>
+    <IncludePath>include;../lib/mnist-reader/include;../lib/neural-net/include;../lib/xml-reader/include;$(IncludePath)</IncludePath>
+    <IntDir>$(SolutionDir)$(Platform)\$(ProjectName)\$(Configuration)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -139,7 +146,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="YANNL-UnitTests.cpp" />
+    <ClCompile Include="tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\TestRuleOfFive.h" />

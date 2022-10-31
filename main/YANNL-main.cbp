@@ -2,24 +2,21 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="YANNL-UnitTests" />
+		<Option title="YANNL-main" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
 			<Target title="Debug">
-				<Option output="../bin/Debug/YANNL-UnitTests" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/Debug/YANNL-main" prefix_auto="1" extension_auto="1" />
 				<Option object_output="../obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
-				<Linker>
-					<Add directory="../bin/Debug" />
-				</Linker>
 			</Target>
 			<Target title="Release">
-				<Option output="../bin/Release/YANNL-UnitTests" prefix_auto="1" extension_auto="1" />
+				<Option output="../bin/Release/YANNL-main" prefix_auto="1" extension_auto="1" />
 				<Option object_output="../obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
@@ -28,21 +25,17 @@
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add directory="../bin/Release" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
-			<Add directory="include" />
-			<Add directory="../YANNL-Lib/mnist-reader/include" />
-			<Add directory="../YANNL-Lib/neural-net/include" />
-			<Add directory="../YANNL-Lib/xml-reader/include" />
+			<Add directory="../lib/mnist-reader/include" />
+			<Add directory="../lib/neural-net/include" />
+			<Add directory="../lib/xml-reader/include" />
 		</Compiler>
-		<Unit filename="YANNL-UnitTests.cpp" />
-		<Unit filename="include/TestRuleOfFive.h" />
-		<Unit filename="include/UnitTests.h" />
+		<Unit filename="YANNL-main.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

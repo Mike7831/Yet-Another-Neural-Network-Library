@@ -10,7 +10,7 @@ using namespace YANNL;
 
 class YANNL_UnitTests
 {
-    const char* kTestDir = "../test/";
+    const char* kTestDir = "../test/expected/";
     const char* kOutputDir = "../output/";
     const char* kDataDir = "../data/";
     const char* kTestFileExt = ".txt";

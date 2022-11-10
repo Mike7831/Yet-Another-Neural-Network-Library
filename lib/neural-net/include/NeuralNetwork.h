@@ -77,21 +77,6 @@ public:
         addDenseLayer(LayerType::Hidden, layerWeights, afunc, bias);
     }
 
-    void addHiddenLayer(const std::vector<std::vector<double>>& layerWeights,
-        const std::vector<double>& layerBias, ActivationFunctions afunc)
-    {
-        // Verify whether the hidden layer is not added after an output layer
-        if (isLastLayerAnOutput())
-        {
-            throw std::domain_error(static_cast<const std::ostringstream&>(std::ostringstream()
-                << "[Add hidden layer] Cannot add a hidden layer after an output layer.").str()
-            );
-        }
-
-        addDenseLayer(LayerType::Hidden, layerWeights, layerBias, afunc);
-    }
-
-
     //! Adds an output classification layer which is a dense layer. See
     //! @ref addDenseLayer(LayerType, size_t, ActivationFunctions, double)
     //! @throws std::domain_error If this output layer is added after an output layer.
@@ -127,19 +112,6 @@ public:
         addDenseLayer(LayerType::OutputClassification, layerWeights, ActivationFunctions::Identity, bias);
     }
 
-    void addOutputClassificationLayer(const std::vector<std::vector<double>>& layerWeights,
-        const std::vector<double>& layerBias)
-    {
-        if (isLastLayerAnOutput())
-        {
-            throw std::domain_error(static_cast<const std::ostringstream&>(std::ostringstream()
-                << "[Add output layer] Cannot add an output layer after an output layer.").str()
-            );
-        }
-
-        addDenseLayer(LayerType::OutputClassification, layerWeights, layerBias, ActivationFunctions::Identity);
-    }
-
     //! Adds an output regression layer which is a dense layer. See
     //! @ref addDenseLayer(LayerType, size_t, ActivationFunctions, double)
     //! @throws std::domain_error If this output layer is added after an output layer.
@@ -173,19 +145,6 @@ public:
         }
 
         addDenseLayer(LayerType::OutputRegression, layerWeights, afunc, bias);
-    }
-
-    void addOutputRegressionLayer(const std::vector<std::vector<double>>& layerWeights,
-        const std::vector<double>& layerBias, ActivationFunctions afunc)
-    {
-        if (isLastLayerAnOutput())
-        {
-            throw std::domain_error(static_cast<const std::ostringstream&>(std::ostringstream()
-                << "[Add output layer] Cannot add an output layer after an output layer.").str()
-            );
-        }
-
-        addDenseLayer(LayerType::OutputRegression, layerWeights, layerBias, afunc);
     }
 
     void addDropoutLayer(double dropoutRate = 0.5)
@@ -578,54 +537,6 @@ private:
         case LayerType::OutputRegression:
             m_Layers.push_back(std::make_shared<OutputRegressionLayer>(
                 layerWeights, afunc, m_LearningRate, m_Momentum, m_SeedGenerator, bias));
-            break;
-        case LayerType::Dropout:
-            // Nothing
-            break;
-        }
-
-    }
-
-    void addDenseLayer(LayerType layerType, const std::vector<std::vector<double>>& layerWeights,
-        const std::vector<double>& layerBias, ActivationFunctions afunc)
-    {
-        // Check whether the number of weights provided is consistent with
-        // the number of neurons from the previous layer.
-        for (size_t n = 0; n < layerWeights.size(); n++)
-        {
-            if (layerWeights[n].size() != lastLayerSize())
-            {
-                throw std::domain_error(static_cast<const std::ostringstream&>(std::ostringstream()
-                    << "[Add layer] Layer size is inconsistent: expected " << lastLayerSize()
-                    << " provided " << layerWeights[n].size() << " on neuron "
-                    << (n + 1) << ".").str()
-                );
-            }
-        }
-
-        // There should be the same number of bias provided than outputs
-        if (layerWeights.size() != layerBias.size())
-        {
-            throw std::domain_error(static_cast<const std::ostringstream&>(std::ostringstream()
-                << "[Add layer] Bias list provided is inconsistent: expected " << layerWeights.size()
-                << " provided " << layerBias.size() << ".").str()
-            );
-        }
-
-        // Add the layer if there is no exception before
-        switch (layerType)
-        {
-        case LayerType::Hidden:
-            m_Layers.push_back(std::make_shared<HiddenLayer>(
-                layerWeights, layerBias, afunc, m_LearningRate, m_Momentum, m_SeedGenerator));
-            break;
-        case LayerType::OutputClassification:
-            m_Layers.push_back(std::make_shared<OutputClassificationLayer>(
-                layerWeights, layerBias, m_LearningRate, m_Momentum, m_SeedGenerator));
-            break;
-        case LayerType::OutputRegression:
-            m_Layers.push_back(std::make_shared<OutputRegressionLayer>(
-                layerWeights, layerBias, afunc, m_LearningRate, m_Momentum, m_SeedGenerator));
             break;
         case LayerType::Dropout:
             // Nothing

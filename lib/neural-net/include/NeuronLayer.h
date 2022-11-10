@@ -140,9 +140,9 @@ public:
                 }));
     }
 
-    //! To be specialized with mean squared error for output regression layers
-    //! and cross entropy error for output classification layers. Nothing recommended
-    //! for hidden layers as it will not be used; can be mean squared error.
+    // To be specialized with mean squared error for output regression layers
+    // and cross entropy error for output classification layers. Nothing recommended
+    // for hidden layers as it will not be used; can be mean squared error.
     // virtual double calcError(const std::vector<double>& expectedOutputs) const = 0;
 
     //! Propagates the expected output backward to first calculate the delta on each neuron

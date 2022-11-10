@@ -1,7 +1,7 @@
 #ifndef YANNL_UNIT_TEST_H
 #define YANNL_UNIT_TEST_H
 
-#include "NeuralNetwork.h"
+#include "MLP.h"
 #include "MnistReader.h"
 #include "SimpleXMLReader.h"
 #include <cassert> // assert for testing purpose
@@ -112,15 +112,15 @@ public:
     void execMnistTests()
     {
         std::cout << ">> Reading MNIST test image file and check normalization method... ";
-        MnistTestImageRead();
+        mnistTestImageRead();
         std::cout << "done. \n";
 
         std::cout << ">> Reading MNIST test label file and check display... ";
-        MnistTestLabelRead();
+        mnistTestLabelRead();
         std::cout << "done. \n";
 
         std::cout << ">> Exception when reading a MNIST file which does not exist... ";
-        MnistTestReadException();
+        mnistTestReadException();
         std::cout << "done. \n";
     }
 
@@ -128,7 +128,7 @@ public:
     {
         std::cout << ">> Testing a neural network simulating an XOR gate with random "
             "weights but fixed seed... ";
-        XORRandomWeightsFixedSeed();
+        xorRandomWeightsFixedSeed();
         std::cout << "done. \n";
     }
 
@@ -136,6 +136,25 @@ public:
     {
         std::cout << ">> Reading XML file, saving it and comparing it... ";
         xmlReadAndSave();
+        std::cout << "done. \n";
+    }
+
+    void execMLPRegressorTests()
+    {
+        std::cout << ">> Testing MLPRegressor with constant learning rate and no early stopping... ";
+        mlpRegressorConstLearningRateNoEarlyStopping();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing MLPRegressor with constant learning rate and early stopping... ";
+        mlpRegressorConstLearningRateEarlyStopping();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing MLPRegressor with inverse scaling learning rate... ";
+        mlpRegressorInvScalingLearningRate();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing MLPRegressor with adaptive learning rate... ";
+        mlpRegressorAdaptiveLearningRate();
         std::cout << "done. \n";
     }
 
@@ -742,7 +761,7 @@ private:
         }
     }
 
-    void XORRandomWeightsFixedSeed()
+    void xorRandomWeightsFixedSeed()
     {
         std::ostringstream os;
         std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
@@ -776,7 +795,7 @@ private:
         compareLineByLine(__func__, os.str(), is.str());
     }
 
-    void MnistTestImageRead()
+    void mnistTestImageRead()
     {
         std::ostringstream os;
         std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
@@ -797,7 +816,7 @@ private:
         assert(*std::max_element(normImages[0].cbegin(), normImages[0].cend()) == 1.0);
     }
 
-    void MnistTestLabelRead()
+    void mnistTestLabelRead()
     {
         std::ostringstream os;
         std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
@@ -811,7 +830,7 @@ private:
         compareLineByLine(__func__, os.str(), is.str());
     }
 
-    void MnistTestReadException()
+    void mnistTestReadException()
     {
         std::ostream os(nullptr);
 
@@ -834,6 +853,197 @@ private:
 
         std::unique_ptr<XMLNode> xml = readXMLStream(ifs);
         xml->inspect(os);
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void mlpRegressorConstLearningRateNoEarlyStopping()
+    {
+        NeuralNetwork net(2, 0.5, 0.9, true, 10); // Random weights but with a fixed seed
+        net.addHiddenLayer(5, ActivationFunctions::Logistic);
+        net.addOutputRegressionLayer(1, ActivationFunctions::Logistic);
+
+        std::vector<std::pair<std::vector<double>, double>> trainingSets{
+            { {0, 0}, 0},
+            { {0, 1}, 1},
+            { {1, 0}, 1},
+            { {1, 1}, 0} };
+
+        for (size_t n = 0; n < 10000; n++)
+        {
+            for (const std::pair<std::vector<double>, double>& trainingSet : trainingSets)
+            {
+                net.propagateForward(trainingSet.first);
+                net.propagateBackward(trainingSet.second);
+            }
+        }
+
+        MLPRegressor mlp({ 5 },             // hidden_layer_sizes
+            ActivationFunctions::Logistic,  // activation
+            Solvers::SGD,                   // solver
+            LearningRate::Constant,         // learning_rate
+            0.5,                            // learning_rate_init
+            0.5,                            // power_t
+            10000,                          // max_iter
+            true,                           // use_random_state
+            10,                             // random_state
+            1.0E-4,                         // tol
+            false,                          // verbose
+            0.9,                            // momentum
+            false,                          // early_stopping
+            10                              // n_iter_no_change
+        );
+        mlp.fit({ {0, 0},  {0, 1},  {1, 0},  {1, 1} }, { 0, 1, 1, 0 });
+
+        for (const std::pair<std::vector<double>, double>& testSet : trainingSets)
+        {
+            assert(net.propagateForward(testSet.first).front() == mlp.predict(testSet.first));
+        }
+    }
+
+    void mlpRegressorConstLearningRateEarlyStopping()
+    {
+        NeuralNetwork net(2, 0.5, 0.9, true, 10); // Random weights but with a fixed seed
+        net.addHiddenLayer(5, ActivationFunctions::Logistic);
+        net.addOutputRegressionLayer(1, ActivationFunctions::Logistic);
+
+        std::vector<std::pair<std::vector<double>, double>> trainingSets{
+            { {0, 0}, 0},
+            { {0, 1}, 1},
+            { {1, 0}, 1},
+            { {1, 1}, 0} };
+
+        for (size_t n = 0; n < 10000; n++)
+        {
+            for (const std::pair<std::vector<double>, double>& trainingSet : trainingSets)
+            {
+                net.propagateForward(trainingSet.first);
+                net.propagateBackward(trainingSet.second);
+            }
+        }
+
+        MLPRegressor mlp({ 5 },             // hidden_layer_sizes
+            ActivationFunctions::Logistic,  // activation
+            Solvers::SGD,                   // solver
+            LearningRate::Constant,         // learning_rate
+            0.5,                            // learning_rate_init
+            0.5,                            // power_t
+            10000,                          // max_iter
+            true,                           // use_random_state
+            10,                             // random_state
+            1.0E-4,                         // tol
+            false,                          // verbose
+            0.9,                            // momentum
+            true,                           // early_stopping
+            10                              // n_iter_no_change
+        );
+        mlp.fit({ {0, 0},  {0, 1},  {1, 0},  {1, 1} }, { 0, 1, 1, 0 });
+
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+
+        for (const std::pair<std::vector<double>, double>& testSet : trainingSets)
+        {
+            os << mlp.predict(testSet.first) << "\n";
+        }
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void mlpRegressorInvScalingLearningRate()
+    {
+        NeuralNetwork net(2, 0.5, 0.9, true, 10); // Random weights but with a fixed seed
+        net.addHiddenLayer(5, ActivationFunctions::Logistic);
+        net.addOutputRegressionLayer(1, ActivationFunctions::Logistic);
+
+        std::vector<std::pair<std::vector<double>, double>> trainingSets{
+            { {0, 0}, 0},
+            { {0, 1}, 1},
+            { {1, 0}, 1},
+            { {1, 1}, 0} };
+
+        for (size_t n = 0; n < 10000; n++)
+        {
+            for (const std::pair<std::vector<double>, double>& trainingSet : trainingSets)
+            {
+                net.propagateForward(trainingSet.first);
+                net.propagateBackward(trainingSet.second);
+            }
+        }
+
+        MLPRegressor mlp({ 5 },             // hidden_layer_sizes
+            ActivationFunctions::Logistic,  // activation
+            Solvers::SGD,                   // solver
+            LearningRate::InvScaling,       // learning_rate
+            0.5,                            // learning_rate_init
+            0.5,                            // power_t
+            10000,                          // max_iter
+            true,                           // use_random_state
+            10,                             // random_state
+            1.0E-4,                         // tol
+            false,                          // verbose
+            0.9,                            // momentum
+            false,                          // early_stopping
+            10                              // n_iter_no_change
+        );
+        mlp.fit({ {0, 0},  {0, 1},  {1, 0},  {1, 1} }, { 0, 1, 1, 0 });
+
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+
+        for (const std::pair<std::vector<double>, double>& testSet : trainingSets)
+        {
+            os << mlp.predict(testSet.first) << "\n";
+        }
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void mlpRegressorAdaptiveLearningRate()
+    {
+        NeuralNetwork net(2, 0.5, 0.9, true, 10); // Random weights but with a fixed seed
+        net.addHiddenLayer(5, ActivationFunctions::Logistic);
+        net.addOutputRegressionLayer(1, ActivationFunctions::Logistic);
+
+        std::vector<std::pair<std::vector<double>, double>> trainingSets{
+            { {0, 0}, 0},
+            { {0, 1}, 1},
+            { {1, 0}, 1},
+            { {1, 1}, 0} };
+
+        for (size_t n = 0; n < 10000; n++)
+        {
+            for (const std::pair<std::vector<double>, double>& trainingSet : trainingSets)
+            {
+                net.propagateForward(trainingSet.first);
+                net.propagateBackward(trainingSet.second);
+            }
+        }
+
+        MLPRegressor mlp({ 5 },             // hidden_layer_sizes
+            ActivationFunctions::Logistic,  // activation
+            Solvers::SGD,                   // solver
+            LearningRate::Adaptive,         // learning_rate
+            0.5,                            // learning_rate_init
+            0.5,                            // power_t
+            10000,                          // max_iter
+            true,                           // use_random_state
+            10,                             // random_state
+            1.0E-4,                         // tol
+            false,                          // verbose
+            0.9,                            // momentum
+            false,                          // early_stopping
+            10                              // n_iter_no_change
+        );
+        mlp.fit({ {0, 0},  {0, 1},  {1, 0},  {1, 1} }, { 0, 1, 1, 0 });
+
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+
+        for (const std::pair<std::vector<double>, double>& testSet : trainingSets)
+        {
+            os << mlp.predict(testSet.first) << "\n";
+        }
 
         compareLineByLine(__func__, os.str(), is.str());
     }

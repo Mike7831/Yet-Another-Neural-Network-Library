@@ -133,6 +133,9 @@ public:
 
                 if (m_EarlyStopping || m_LearningRateType == LearningRate::Adaptive)
                 {
+                    // In case of early stopping or adaptive learning rate
+                    // we need to keep track of the last errors.
+
                     if (errors.size() < m_IterNoChangeN + 1)
                     {
                         // +1 because the (N+1)th element is used as a reference
@@ -146,6 +149,8 @@ public:
                         errors.pop_front();
                         errors.push_back(error);
 
+                        // Only in the case of early stopping and not in the case
+                        // of adaptive learning rate, determine whether to stop.
                         if (m_LearningRateType != LearningRate::Adaptive)
                         {
                             bool earlyStop = true;
@@ -168,14 +173,25 @@ public:
                         }
                     }
 
+                    // In case of adaptive learning rate and with sufficient
+                    // error history (current + 2 = 3)
                     if (m_LearningRateType == LearningRate::Adaptive
                         && errors.size() >= 3)
                     {
-                        //TODO
-                        //auto it = errors.crend();
-                        //double error2 = *it; std::advance(it, 1);
-                        //double error1 = *it; std::advance(it, 1);
-                        //double error0 = *it;
+                        auto it = errors.crbegin();
+                        double error2 = *it; std::advance(it, 1);
+                        double error1 = *it; std::advance(it, 1);
+                        double error0 = *it;
+
+                        // Each time two consecutive epochs fail to
+                        // decrease training loss by at least tol,
+                        // the current learning rate is divided by 5.
+                        if (!(error0 - error1 > m_OptimizationTolerance
+                            && error1 - error2 > m_OptimizationTolerance))
+                        {
+                            m_EffectiveLearningRate /= 5;
+                            m_Net->updateLearningRate(m_EffectiveLearningRate);
+                        }
                     }
                 }
 

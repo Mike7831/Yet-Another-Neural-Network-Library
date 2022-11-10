@@ -34,8 +34,15 @@
 			<Add directory="../lib/mnist-reader/include" />
 			<Add directory="../lib/neural-net/include" />
 			<Add directory="../lib/xml-reader/include" />
+			<Add directory="include" />
 		</Compiler>
+		<Unit filename="include/IrisClassification.h" />
+		<Unit filename="include/MnistPrediction.h" />
+		<Unit filename="include/XORPrediction.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="src/IrisClassification.cpp" />
+		<Unit filename="src/MnistPrediction.cpp" />
+		<Unit filename="src/XORPrediction.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>

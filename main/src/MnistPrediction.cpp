@@ -16,18 +16,18 @@ void mnistTrain(const std::string& trainImagePath, const std::string& trainLabel
     constexpr size_t kBarWidth = 50;
 
     // Read training images
-    std::cout << "Opening training image file..." << std::endl;
+    std::cout << "Opening training image file... \n";
     MnistReader::ImageContainer trainImages;
     const MnistReader::MnistFileAttrs trainAttrs(MnistReader::readMnist(trainImagePath, trainImages));
     MnistReader::NormalizedImageContainer trainNormImages(MnistReader::normalize(trainImages));
     std::cout << "Number of images: " << trainAttrs.count << "\n"
-        << "Dimensions of images: ( " << trainAttrs.rowsN << " x " << trainAttrs.colsN << " )" << std::endl;
+        << "Dimensions of images: ( " << trainAttrs.rowsN << " x " << trainAttrs.colsN << " ) \n";
 
     // Read training labels
-    std::cout << "Opening training label file..." << std::endl;
+    std::cout << "Opening training label file... \n";
     MnistReader::LabelContainer trainLabels;
     const int32_t trainCount(MnistReader::readMnist(trainLabelPath, trainLabels));
-    std::cout << "Number of labels: " << trainCount << std::endl;
+    std::cout << "Number of labels: " << trainCount << "\n";
 
     if (trainAttrs.count != trainCount)
     {
@@ -39,21 +39,21 @@ void mnistTrain(const std::string& trainImagePath, const std::string& trainLabel
     }
 
     // Build neural network with 1 hidden layer of 128 and 1 output layer of 10 labels
-    std::cout << "Setting up the neural network..." << std::endl;
+    std::cout << "Setting up the neural network... \n";
     NeuralNetwork net(1 * 28 * 28, 0.0001, 0.4);
     net.addHiddenLayer(128, ActivationFunctions::ReLU);
     net.addDropoutLayer(0.5);
     net.addOutputRegressionLayer(10, ActivationFunctions::Tanh);
     size_t epochN = 3;
-    std::cout << "Done." << std::endl;
+    std::cout << "Done. \n";
 
     // Train the network with 3 epochs
     std::cout << "Start training the network on " << trainCount << " images "
-        << "for " << epochN << " epochs..." << std::endl;
+        << "for " << epochN << " epochs... \n";
 
     for (size_t epoch = 0; epoch < epochN; epoch++)
     {
-        std::cout << "Epoch " << (epoch + 1) << " / " << epochN << std::endl;
+        std::cout << "Epoch " << (epoch + 1) << " / " << epochN << "\n";
         char current_pos_char = '/';
 
         // For each set of image and label
@@ -100,12 +100,12 @@ void mnistTrain(const std::string& trainImagePath, const std::string& trainLabel
         }
 
         std::cout << " ] 100% | Error: "
-            << net.calcError(Utils::convertLabelToVect(trainLabels.back(), 0, 9)) << std::endl;
+            << net.calcError(Utils::convertLabelToVect(trainLabels.back(), 0, 9)) << "\n";
         std::cout.unsetf(std::ios_base::fixed);
     }
 
     net.saveToFile(outputPath);
-    std::cout << "Network trained and saved." << std::endl;
+    std::cout << "Network trained and saved. \n";
 }
 
 void mnistTest(const std::string& networkPath, const std::string& testImagePath,
@@ -115,18 +115,18 @@ void mnistTest(const std::string& networkPath, const std::string& testImagePath,
     constexpr size_t kBarWidth = 50;
 
     // Read test images
-    std::cout << "Opening test image file..." << std::endl;
+    std::cout << "Opening test image file... \n";
     MnistReader::ImageContainer testImages;
     const MnistReader::MnistFileAttrs testAttrs(MnistReader::readMnist(testImagePath, testImages));
     MnistReader::NormalizedImageContainer testNormImages(MnistReader::normalize(testImages));
     std::cout << "Number of images: " << testAttrs.count << "\n"
-        << "Dimensions of images: ( " << testAttrs.rowsN << " x " << testAttrs.colsN << " )" << std::endl;
+        << "Dimensions of images: ( " << testAttrs.rowsN << " x " << testAttrs.colsN << " ) \n";
 
     // Read test labels
-    std::cout << "Opening test label file..." << std::endl;
+    std::cout << "Opening test label file... \n";
     MnistReader::LabelContainer testLabels;
     const int32_t testCount(MnistReader::readMnist(testLabelPath, testLabels));
-    std::cout << "Number of labels: " << testCount << std::endl;
+    std::cout << "Number of labels: " << testCount << "\n";
 
     if (testAttrs.count != testCount)
     {
@@ -138,13 +138,13 @@ void mnistTest(const std::string& networkPath, const std::string& testImagePath,
     }
 
     // Load the network
-    std::cout << "Loading neural network from file " << networkPath << "..." << std::endl;
+    std::cout << "Loading neural network from file " << networkPath << "... \n";
     NeuralNetwork net = NeuralNetwork::loadFromFile(networkPath);
-    std::cout << "Done." << std::endl;;
+    std::cout << "Done. \n";
 
     // Validate the network
 
-    std::cout << "Start validating the network on " << testCount << " images..." << std::endl;
+    std::cout << "Start validating the network on " << testCount << " images... \n";
     size_t passed = 0;
 
     for (size_t n = 0; n < static_cast<size_t>(testCount); n++)
@@ -179,9 +179,9 @@ void mnistTest(const std::string& networkPath, const std::string& testImagePath,
         std::cout << "=";
     }
 
-    std::cout << " ] 100%" << std::endl;
+    std::cout << " ] 100% \n";
     std::cout << "Validation results: passed " << passed << " / " << testCount << " "
-        << "( accuracy " << (passed * 100.0 / testCount) << "% )." << std::endl;
+        << "( accuracy " << (passed * 100.0 / testCount) << "% ). \n";
 }
 
 }

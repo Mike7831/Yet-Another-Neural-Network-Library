@@ -146,11 +146,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\IrisClassification.cpp" />
     <ClCompile Include="src\MnistPrediction.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="src\XORPrediction.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\IrisClassification.h" />
     <ClInclude Include="include\MnistPrediction.h" />
+    <ClInclude Include="include\XORPrediction.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

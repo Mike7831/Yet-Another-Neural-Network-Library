@@ -10,4 +10,5 @@ int main(int argc, char* argv[])
     tests.execOtherTests();
     tests.execMnistTests();
     tests.execXMLTests();
+    tests.execMLPRegressorTests();
 }

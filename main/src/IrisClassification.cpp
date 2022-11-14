@@ -1,3 +1,7 @@
+//! Yet Another Neural Network Library C++ (YANNL-C++)
+//! @copyright  Copyright(c) 2022 - Mickael Deloison
+//! @license    https://opensource.org/licenses/GPL-3.0 GPL-3.0
+
 #include "IrisClassification.h"
 #include "MLP.h"
 

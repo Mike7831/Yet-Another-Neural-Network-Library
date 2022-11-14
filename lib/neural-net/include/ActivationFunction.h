@@ -1,3 +1,7 @@
+//! Yet Another Neural Network Library C++ (YANNL-C++)
+//! @copyright  Copyright(c) 2022 - Mickael Deloison
+//! @license    https://opensource.org/licenses/GPL-3.0 GPL-3.0
+
 #ifndef YANNL_ACTIVATION_FUNCTION_H
 #define YANNL_ACTIVATION_FUNCTION_H
 

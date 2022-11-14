@@ -1,3 +1,7 @@
+//! Yet Another Neural Network Library C++ (YANNL-C++)
+//! @copyright  Copyright(c) 2022 - Mickael Deloison
+//! @license    https://opensource.org/licenses/GPL-3.0 GPL-3.0
+
 #ifndef YANNL_UNIT_TEST_H
 #define YANNL_UNIT_TEST_H
 
@@ -139,7 +143,7 @@ public:
         std::cout << "done. \n";
     }
 
-    void execMLPRegressorTests()
+    void execMLPTests()
     {
         std::cout << ">> Testing MLPRegressor with constant learning rate and no early stopping... ";
         mlpRegressorConstLearningRateNoEarlyStopping();
@@ -155,6 +159,10 @@ public:
 
         std::cout << ">> Testing MLPRegressor with adaptive learning rate... ";
         mlpRegressorAdaptiveLearningRate();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing MLPClassifier with constant learning rate and no early stopping... ";
+        mlpClassifierConstLearningRateNoEarlyStopping();
         std::cout << "done. \n";
     }
 
@@ -897,7 +905,8 @@ private:
 
         for (const std::pair<std::vector<double>, double>& testSet : trainingSets)
         {
-            assert(net.propagateForward(testSet.first).front() == mlp.predict(testSet.first));
+            std::vector<double> output = net.propagateForward(testSet.first);
+            assert(output.front() == mlp.predict(testSet.first));
         }
     }
 
@@ -1046,6 +1055,52 @@ private:
         }
 
         compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void mlpClassifierConstLearningRateNoEarlyStopping()
+    {
+        NeuralNetwork net(2, 0.1, 0.0, true, 10); // Random weights but with a fixed seed
+        net.addHiddenLayer(3, ActivationFunctions::Logistic);
+        net.addHiddenLayer(3, ActivationFunctions::Logistic);
+        net.addOutputClassificationLayer(2);
+
+        std::vector<std::pair<std::vector<double>, uint8_t>> trainingSets{
+            { {0, 0}, 0},
+            { {0, 1}, 1},
+            { {1, 0}, 1},
+            { {1, 1}, 0} };
+
+        for (size_t n = 0; n < 100; n++)
+        {
+            for (const std::pair<std::vector<double>, uint8_t>& trainingSet : trainingSets)
+            {
+                net.propagateForward(trainingSet.first);
+                net.propagateBackward(Utils::convertLabelToVect(trainingSet.second, 0, 1));
+            }
+        }
+
+        MLPClassifer mlp({ 3, 3 },          // hidden_layer_sizes
+            ActivationFunctions::Logistic,  // activation
+            Solvers::SGD,                   // solver
+            LearningRate::Constant,         // learning_rate
+            0.1,                            // learning_rate_init
+            0.5,                            // power_t
+            100,                            // max_iter
+            true,                           // use_random_state
+            10,                             // random_state
+            1.0E-4,                         // tol
+            false,                          // verbose
+            0.0,                            // momentum
+            false,                          // early_stopping
+            10                              // n_iter_no_change
+        );
+        mlp.fit({ {0, 0},  {0, 1},  {1, 0},  {1, 1} }, { 0, 1, 1, 0 });
+
+        for (const std::pair<std::vector<double>, double>& testSet : trainingSets)
+        {
+            net.propagateForward(testSet.first);
+            assert(net.probableClass() == mlp.predict(testSet.first));
+        }
     }
 
     std::stringstream readExpectedResultFile(const std::string& filepath)

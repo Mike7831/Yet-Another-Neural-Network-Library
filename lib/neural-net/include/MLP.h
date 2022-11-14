@@ -24,45 +24,20 @@ enum class LearningRate
     Adaptive
 };
 
-class MLPRegressor
+enum class MLPType
+{
+    Regressor = 0,
+    Classifier
+};
+
+typedef uint8_t t_Labels;
+
+template<typename T>
+class MLP
 {
 public:
-    explicit MLPRegressor(
-        const std::vector<size_t>& hidden_layer_sizes = { 100 },
-        ActivationFunctions activation = ActivationFunctions::ReLU,
-        Solvers solver = Solvers::SGD,
-        LearningRate learning_rate = LearningRate::Constant,
-        double learning_rate_init = 0.001,
-        double power_t = 0.5,
-        size_t max_iter = 200,
-        bool use_random_state = false,
-        unsigned int random_state = 0,
-        double tol = 0.0001,
-        bool verbose = false,
-        double momentum = 0.9,
-        bool early_stopping = false,
-        size_t n_iter_no_change = 10) :
-        m_HiddenLayerSizes(hidden_layer_sizes),
-        m_AFunc(activation),
-        m_Solver(solver),
-        m_LearningRateType(learning_rate),
-        m_LearningRate(learning_rate_init),
-        m_PowerT(power_t),
-        m_MaxIterations(max_iter),
-        m_UseSeed(use_random_state),
-        m_Seed(random_state),
-        m_OptimizationTolerance(tol),
-        m_Verbose(verbose),
-        m_Momentum(momentum),
-        m_EarlyStopping(early_stopping),
-        m_IterNoChangeN(n_iter_no_change),
-        m_EffectiveLearningRate(learning_rate_init)
-    {
-
-    }
-
     void fit(const std::vector<std::vector<double>>& inputs,
-        const std::vector<double>& expectedOuputs)
+        const std::vector<T>& expectedOuputs)
     {
         log("Checks whether input is empty.");
 
@@ -111,8 +86,24 @@ public:
                     m_Net->addHiddenLayer(layerSize, m_AFunc);
                 });
 
-            log("Adds output regression layer of size 1.");
-            m_Net->addOutputRegressionLayer(1, m_AFunc);
+            t_Labels max = 0; // max label if MLPClassifier
+            t_Labels min = 0; // min label if MLPClassifier
+
+            if (type() == MLPType::Classifier)
+            {
+                max = (t_Labels) *std::max_element(expectedOuputs.begin(), expectedOuputs.end());
+                min = (t_Labels) *std::min_element(expectedOuputs.begin(), expectedOuputs.end());
+                t_Labels size = max - min + 1; // min included to max included = max - min + 1
+
+                log("Adds output classification layer of size " + std::to_string(size)
+                    + " for range " + std::to_string(min) + "-" + std::to_string(max) + ".");
+                m_Net->addOutputClassificationLayer(size);
+            }
+            else
+            {
+                log("Adds output regression layer of size 1.");
+                m_Net->addOutputRegressionLayer(1, m_AFunc);
+            }
 
             log("Trains the network with max " + std::to_string(m_MaxIterations) + " epochs.");
 
@@ -129,8 +120,18 @@ public:
                 for (size_t i = 0; i < inputs.size(); i++)
                 {
                     m_Net->propagateForward(inputs[i]);
-                    error += m_Net->calcError(expectedOuputs[i]);
-                    m_Net->propagateBackward(expectedOuputs[i]);
+
+                    if (type() == MLPType::Classifier)
+                    {
+                        std::vector<double> expectedOutput = Utils::convertLabelToVect((t_Labels) expectedOuputs[i], min, max);
+                        error += m_Net->calcError(expectedOutput);
+                        m_Net->propagateBackward(expectedOutput);
+                    }
+                    else
+                    {
+                        error += m_Net->calcError(expectedOuputs[i]);
+                        m_Net->propagateBackward(expectedOuputs[i]);
+                    }
                 }
 
                 error /= inputs.size();
@@ -219,23 +220,6 @@ public:
         }
     }
 
-    double predict(const std::vector<double>& input) const
-    {
-        if (m_Net.get() == nullptr)
-        {
-            throw std::domain_error("Use fit before predict.");
-        }
-
-        return m_Net->propagateForward(input)[0];
-    }
-
-    std::vector<double> predict(const std::vector<std::vector<double>>& inputs) const
-    {
-        std::vector<double> outputs;
-
-        return outputs;
-    }
-
     void log(const std::string& msg) const
     {
         if (m_Verbose)
@@ -244,10 +228,44 @@ public:
         }
     }
 
-    void inspect(std::ostream& os) const
+    virtual MLPType type() const = 0;
+
+protected:
+    explicit MLP(
+        const std::vector<size_t>& hidden_layer_sizes,
+        ActivationFunctions activation,
+        Solvers solver,
+        LearningRate learning_rate,
+        double learning_rate_init,
+        double power_t,
+        size_t max_iter,
+        bool use_random_state,
+        unsigned int random_state,
+        double tol,
+        bool verbose,
+        double momentum,
+        bool early_stopping,
+        size_t n_iter_no_change) :
+        m_HiddenLayerSizes(hidden_layer_sizes),
+        m_AFunc(activation),
+        m_Solver(solver),
+        m_LearningRateType(learning_rate),
+        m_LearningRate(learning_rate_init),
+        m_PowerT(power_t),
+        m_MaxIterations(max_iter),
+        m_UseSeed(use_random_state),
+        m_Seed(random_state),
+        m_OptimizationTolerance(tol),
+        m_Verbose(verbose),
+        m_Momentum(momentum),
+        m_EarlyStopping(early_stopping),
+        m_IterNoChangeN(n_iter_no_change),
+        m_EffectiveLearningRate(learning_rate_init)
     {
 
     }
+
+    std::unique_ptr<NeuralNetwork> m_Net;
 
 private:
     const std::vector<size_t> m_HiddenLayerSizes;
@@ -265,9 +283,119 @@ private:
     const bool m_EarlyStopping;
     const size_t m_IterNoChangeN;
 
-    std::unique_ptr<NeuralNetwork> m_Net;
-
     double m_EffectiveLearningRate;
+};
+
+class MLPRegressor : public MLP<double>
+{
+public:
+    explicit MLPRegressor(
+        const std::vector<size_t>& hidden_layer_sizes = { 100 },
+        ActivationFunctions activation = ActivationFunctions::ReLU,
+        Solvers solver = Solvers::SGD,
+        LearningRate learning_rate = LearningRate::Constant,
+        double learning_rate_init = 0.001,
+        double power_t = 0.5,
+        size_t max_iter = 200,
+        bool use_random_state = false,
+        unsigned int random_state = 0,
+        double tol = 0.0001,
+        bool verbose = false,
+        double momentum = 0.9,
+        bool early_stopping = false,
+        size_t n_iter_no_change = 10) :
+        MLP(hidden_layer_sizes,
+            activation,
+            solver,
+            learning_rate,
+            learning_rate_init,
+            power_t,
+            max_iter,
+            use_random_state,
+            random_state,
+            tol,
+            verbose,
+            momentum,
+            early_stopping,
+            n_iter_no_change)
+    {
+
+    }
+
+    double predict(const std::vector<double>& input) const
+    {
+        if (m_Net.get() == nullptr)
+        {
+            throw std::domain_error("Use fit before predict.");
+        }
+
+        return m_Net->propagateForward(input)[0];
+    }
+
+    std::vector<double> predict(const std::vector<std::vector<double>>& inputs) const
+    {
+        std::vector<double> outputs;
+
+        return outputs;
+    }
+
+    MLPType type() const override
+    {
+        return MLPType::Regressor;
+    }
+};
+
+class MLPClassifer : public MLP<t_Labels>
+{
+public:
+    explicit MLPClassifer(
+        const std::vector<size_t>& hidden_layer_sizes = { 100 },
+        ActivationFunctions activation = ActivationFunctions::ReLU,
+        Solvers solver = Solvers::SGD,
+        LearningRate learning_rate = LearningRate::Constant,
+        double learning_rate_init = 0.001,
+        double power_t = 0.5,
+        size_t max_iter = 200,
+        bool use_random_state = false,
+        unsigned int random_state = 0,
+        double tol = 0.0001,
+        bool verbose = false,
+        double momentum = 0.9,
+        bool early_stopping = false,
+        size_t n_iter_no_change = 10) :
+        MLP(hidden_layer_sizes,
+            activation,
+            solver,
+            learning_rate,
+            learning_rate_init,
+            power_t,
+            max_iter,
+            use_random_state,
+            random_state,
+            tol,
+            verbose,
+            momentum,
+            early_stopping,
+            n_iter_no_change)
+    {
+
+    }
+
+    size_t predict(const std::vector<double>& input) const
+    {
+        if (m_Net.get() == nullptr)
+        {
+            throw std::domain_error("Use fit before predict.");
+        }
+
+        m_Net->propagateForward(input);
+        return m_Net->probableClass();
+    }
+
+    MLPType type() const override
+    {
+        return MLPType::Classifier;
+    }
 };
 
 }

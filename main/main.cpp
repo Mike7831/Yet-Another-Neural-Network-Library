@@ -13,23 +13,24 @@ int main(int argc, char* argv[])
 {
     try
     {
-        std::cout << "================================================================================== \n"
-            << "Test iris flower classification with MLPClassifier vs. manually built classifier \n"
+        std::cout << "Test iris flower classification with MLPClassifier vs. manually built classifier \n"
             << "================================================================================== \n\n";
-        irisClassificationTrainTestManualNN();
-        std::cout << "================================================================================== \n"
-            << "================================================================================== \n\n";
+        IrisClassification irisClassification;
+        irisClassification.irisClassificationTrainTestManualNN("../data/iris_flowers.csv");
+        irisClassification.irisClassificationTrainTestMLPClassifier("../data/iris_flowers.csv");
+        std::cout  << "================================================================================== \n\n";
 
-        std::cout << "================================================================================== \n"
-            << "Test XOR prediction with MLPRegressor vs. manually built regressors \n"
+        std::cout << "Test XOR prediction with MLPRegressor vs. manually built regressors \n"
             << "================================================================================== \n\n";
         xorTrainTestManualNN();
         xorTrainTestMLPRegressor();
-        std::cout << "================================================================================== \n"
-            << "================================================================================== \n\n";
+        std::cout << "================================================================================== \n\n";
 
-        //mnistTrain("../data/train-images.idx3-ubyte", "../data/train-labels.idx1-ubyte", "../output/mnist-nn.txt");
-        //mnistTest("../output/mnist-nn.txt", "../data/t10k-images.idx3-ubyte", "../data/t10k-labels.idx1-ubyte");
+        std::cout << "Test prediction of MNIST handwritten digits (0-9) \n"
+            << "================================================================================== \n\n";
+        mnistTrain("../data/train-images.idx3-ubyte", "../data/train-labels.idx1-ubyte", "../output/mnist-nn.txt");
+        mnistTest("../output/mnist-nn.txt", "../data/t10k-images.idx3-ubyte", "../data/t10k-labels.idx1-ubyte");
+        std::cout << "================================================================================== \n\n";
     }
     catch (std::exception& e)
     {

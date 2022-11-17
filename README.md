@@ -2,7 +2,7 @@
 
 ## Overview
 
-Main goal of this C++ library is to mimic the behavior of `MLPRegressor` and `MLPClassifier` (Multi-Layer Perceptron) of the Python Scikit-Learn library in C++. It contains all the underlying classes for representing a Multi-Layer Perceptron.
+Main goal of this C++ library is to mimic the behavior of `MLPRegressor` and `MLPClassifier` (Multi-Layer Perceptron) of the Python Scikit-Learn library in C++. It contains all the underlying classes for representing a Multi-Layer Perceptron.  
 It also includes a very simple XML reader and MNIST file reader. [MNIST](http://yann.lecun.com/exdb/mnist/) is a database of handwritten digits that the main file uses to demonstrate the possibility of the library.
 
 It uses only the C++ standard library. Compiled with C++14 compiler. No dependencies to other libraries.
@@ -126,28 +126,29 @@ You will find at the root of the project:
 * Workspace file for Code::Blocks
 
 If you would like to launch the main examples (iris classification, MNIST prediction, XOR prediction) set the `main` project as active/startup project (right click > Activate project in C::B, right click > Set as startup project in MS VS).
+
 If you would like to launch the battery of unit/regression tests, set the `test` project as active/startup project.
 
 It is also easy to copy/paste the files into other projects as the library relies only on the STL and the library files are header-only.
 
 ## Usage
 
-`main.cpp` within the `main` folder calls different examples which give examples on how to use the YANNL-Library.
+`main.cpp` within the `main` folder calls different examples which give examples on how to use the YANNL-Library
+
 Globally `MLPRegressor` and `MLPClassifier` can be used approximately in the same way as the Python version.
-It is also possible to build manually a neural network (`NeuralNetwork` class) and then add the layers (`HiddenLayer`, `OutputClassificationLayer`, `OutputRegressionLayer`, `DropoutLayer`). The input layer is not considered as a layer in the layer count. Its size is provided as input when building the `NeuralNetwork`.
-It should not be necessary to build manually layers and neurons as they are supposed to be built via the constructors and methods within `NeuralNetwork`.
+
+It is also possible to build manually a neural network (`NeuralNetwork` class) and then add the layers (`HiddenLayer`, `OutputClassificationLayer`, `OutputRegressionLayer`, `DropoutLayer`). The input layer is not considered as a layer in the layer count. Its size is provided as input when building the `NeuralNetwork`. It should not be necessary to build manually layers and neurons as they are supposed to be built via the constructors and methods within `NeuralNetwork`.
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first
-to discuss what you would like to change.
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
 
 ## What next
 
-The `MLPRegressor` and `MLPClassifier` only use dense layers (hidden layers and output classification/regression layers).
-Dropout layers are not used. Could be an improvement.
+The `MLPRegressor` and `MLPClassifier` only use dense layers (hidden layers and output classification/regression layers).  
+Dropout layers are not used. Could be an improvement.  
 Further improvement would be to implement convolutional neural networks.
 
 ## Author
@@ -156,8 +157,8 @@ Mickael Deloison
 
 ## Sources
 
-[A Step by Step Back propagation Example](https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/)
-[MLPRegressor specification](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html)
-[MLPClassifier specification](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html)
-[Dropout layer](https://keras.io/api/layers/regularization_layers/dropout/)
-[Gradient Descent With Momentum from Scratch](https://machinelearningmastery.com/gradient-descent-with-momentum-from-scratch/)
+[A Step by Step Back propagation Example](https://mattmazur.com/2015/03/17/a-step-by-step-backpropagation-example/)  
+[MLPRegressor specification](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPRegressor.html)  
+[MLPClassifier specification](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html)  
+[Dropout layer](https://keras.io/api/layers/regularization_layers/dropout/)  
+[Gradient Descent With Momentum from Scratch](https://machinelearningmastery.com/gradient-descent-with-momentum-from-scratch/)  

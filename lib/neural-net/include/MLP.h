@@ -220,14 +220,6 @@ public:
         }
     }
 
-    void log(const std::string& msg) const
-    {
-        if (m_Verbose)
-        {
-            std::cerr << msg << std::endl;
-        }
-    }
-
     virtual MLPType type() const = 0;
 
 protected:
@@ -266,6 +258,14 @@ protected:
     }
 
     std::unique_ptr<NeuralNetwork> m_Net;
+
+    void log(const std::string& msg) const
+    {
+        if (m_Verbose)
+        {
+            std::cerr << msg << std::endl;
+        }
+    }
 
 private:
     const std::vector<size_t> m_HiddenLayerSizes;

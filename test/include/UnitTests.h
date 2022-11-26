@@ -152,15 +152,15 @@ public:
         std::cout << ">> Testing MLPRegressor with constant learning rate and early stopping... ";
         mlpRegressorConstLearningRateEarlyStopping();
         std::cout << "done. \n";
-
+        
         std::cout << ">> Testing MLPRegressor with inverse scaling learning rate... ";
         mlpRegressorInvScalingLearningRate();
         std::cout << "done. \n";
-
+        
         std::cout << ">> Testing MLPRegressor with adaptive learning rate... ";
         mlpRegressorAdaptiveLearningRate();
         std::cout << "done. \n";
-
+        
         std::cout << ">> Testing MLPClassifier with constant learning rate and no early stopping... ";
         mlpClassifierConstLearningRateNoEarlyStopping();
         std::cout << "done. \n";
@@ -922,15 +922,6 @@ private:
             { {1, 0}, 1},
             { {1, 1}, 0} };
 
-        for (size_t n = 0; n < 10000; n++)
-        {
-            for (const std::pair<std::vector<double>, double>& trainingSet : trainingSets)
-            {
-                net.propagateForward(trainingSet.first);
-                net.propagateBackward(trainingSet.second);
-            }
-        }
-
         MLPRegressor mlp({ 5 },             // hidden_layer_sizes
             ActivationFunctions::Logistic,  // activation
             Solvers::SGD,                   // solver
@@ -940,7 +931,7 @@ private:
             10000,                          // max_iter
             true,                           // use_random_state
             10,                             // random_state
-            1.0E-4,                         // tol
+            1.0E-5,                         // tol
             false,                          // verbose
             0.9,                            // momentum
             true,                           // early_stopping
@@ -970,15 +961,6 @@ private:
             { {0, 1}, 1},
             { {1, 0}, 1},
             { {1, 1}, 0} };
-
-        for (size_t n = 0; n < 10000; n++)
-        {
-            for (const std::pair<std::vector<double>, double>& trainingSet : trainingSets)
-            {
-                net.propagateForward(trainingSet.first);
-                net.propagateBackward(trainingSet.second);
-            }
-        }
 
         MLPRegressor mlp({ 5 },             // hidden_layer_sizes
             ActivationFunctions::Logistic,  // activation
@@ -1020,15 +1002,6 @@ private:
             { {1, 0}, 1},
             { {1, 1}, 0} };
 
-        for (size_t n = 0; n < 10000; n++)
-        {
-            for (const std::pair<std::vector<double>, double>& trainingSet : trainingSets)
-            {
-                net.propagateForward(trainingSet.first);
-                net.propagateBackward(trainingSet.second);
-            }
-        }
-
         MLPRegressor mlp({ 5 },             // hidden_layer_sizes
             ActivationFunctions::Logistic,  // activation
             Solvers::SGD,                   // solver
@@ -1038,7 +1011,7 @@ private:
             10000,                          // max_iter
             true,                           // use_random_state
             10,                             // random_state
-            1.0E-4,                         // tol
+            1.0E-5,                         // tol
             false,                          // verbose
             0.9,                            // momentum
             false,                          // early_stopping

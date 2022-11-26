@@ -9,20 +9,27 @@ It uses only the C++ standard library. Compiled with C++14 compiler. No dependen
 
 ## Characteristics
 
-Layer types included:
-* Dense
-    * Hidden
-    * Output classification (with a Cross-Entropy Error function)
-    * Output regression (with Mean-Squared Error function)
-* Dropout
-
-Activation functions included:
-* Identity
-* Logistic
-* Tanh
-* ReLU
-* ISRLU
-Other activation functions can be added easily in the `ActivationFunction.h` file.
+* Gradient Descent Algorithms
+    * Stochastic
+    * _Batch to be included (TODO)_
+    * _Mini-batch to be included (TODO)_
+* Layer types included:
+    * Dense
+        * Hidden
+        * Output classification (with a **Cross-Entropy Error** function)
+        * Output regression (with **Mean-Squared Error** function)
+    * Dropout
+* Activation functions included:
+    * Identity
+    * Logistic
+    * Tanh
+    * ReLU
+    * ISRLU
+    * Other activation functions can be added easily in the `ActivationFunction.h` file.
+* Momentum
+* Adaptive and InvScaling learning rates
+* Seed
+* Serialization (save neural network to file / reload network from file)
 
 
 ## Folder structure

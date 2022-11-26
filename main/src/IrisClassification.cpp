@@ -64,7 +64,7 @@ void IrisClassification::irisClassificationTrainTestManualNN(const std::string& 
 
     std::cout << "Building and training the neural network (manually built)... \n";
 
-    NeuralNetwork net(4, 0.1, 0.0, true, 10); // Random weights but with a fixed seed
+    NeuralNetwork net(4, kLearningRate, kMomentum, true, 10); // Random weights but with a fixed seed
     net.addHiddenLayer(3, ActivationFunctions::Logistic);
     net.addHiddenLayer(3, ActivationFunctions::Logistic);
     net.addOutputClassificationLayer(3);
@@ -165,14 +165,14 @@ void IrisClassification::irisClassificationTrainTestMLPClassifier(const std::str
         ActivationFunctions::Logistic,  // activation
         Solvers::SGD,                   // solver
         LearningRate::Constant,         // learning_rate
-        0.1,                            // learning_rate_init
+        kLearningRate,                  // learning_rate_init
         0.5,                            // power_t
         kEpochN,                        // max_iter
         true,                           // use_random_state
         10,                             // random_state
-        1.0E-4,                         // tol
+        1.0E-5,                         // tol
         true,                           // verbose
-        0.0,                            // momentum
+        kMomentum,                      // momentum
         false,                          // early_stopping
         10                              // n_iter_no_change
     );
@@ -190,6 +190,8 @@ void IrisClassification::irisClassificationTrainTestMLPClassifier(const std::str
     mlp.fit(X, y);
 
     std::cout << "done. \n";
+
+    mlp.inspect(std::cout);
 
     std::cout << "Testing the network with the same dataset as the one for training... \n";
 

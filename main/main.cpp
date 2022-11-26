@@ -19,13 +19,13 @@ int main(int argc, char* argv[])
         irisClassification.irisClassificationTrainTestManualNN("../data/iris_flowers.csv");
         irisClassification.irisClassificationTrainTestMLPClassifier("../data/iris_flowers.csv");
         std::cout  << "================================================================================== \n\n";
-
+        
         std::cout << "Test XOR prediction with MLPRegressor vs. manually built regressors \n"
             << "================================================================================== \n\n";
         xorTrainTestManualNN();
         xorTrainTestMLPRegressor();
         std::cout << "================================================================================== \n\n";
-
+        
         std::cout << "Test prediction of MNIST handwritten digits (0-9) \n"
             << "================================================================================== \n\n";
         mnistTrain("../data/train-images.idx3-ubyte", "../data/train-labels.idx1-ubyte", "../output/mnist-nn.txt");

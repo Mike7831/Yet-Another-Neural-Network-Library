@@ -66,7 +66,7 @@ void xorTrainTestMLPRegressor()
         10000,                          // max_iter
         true,                           // use_random_state
         10,                             // random_state
-        1.0E-4,                         // tol
+        1.0E-5,                         // tol
         true,                           // verbose
         0.9,                            // momentum
         false,                          // early_stopping

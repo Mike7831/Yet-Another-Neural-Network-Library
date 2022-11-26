@@ -24,6 +24,8 @@ public:
 private:
     const size_t kBarWidth = 50;
     const size_t kEpochN = 1000;
+    const double kLearningRate = 0.001;
+    const double kMomentum = 0.9;
     const std::map<size_t, std::string> kIrisClassMap{
         { 0, "iris_setosa    " },
         { 1, "iris_versicolor" },

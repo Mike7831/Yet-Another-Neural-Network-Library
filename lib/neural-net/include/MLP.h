@@ -7,7 +7,6 @@
 
 #include "NeuralNetwork.h"
 #include <chrono>   // std::chrono
-#include <list>    // std::list
 
 namespace YANNL
 {
@@ -110,10 +109,10 @@ public:
             // Train neural network
 
             auto t0 = std::chrono::high_resolution_clock::now();
-            std::list<double> errors;
+            std::vector<double> errors;
             double error = 0.0;
 
-            for (size_t n = 0; n < m_MaxIterations; n++)
+            for (size_t epoch = 0; epoch < m_MaxIterations; epoch++)
             {
                 error = 0.0;
 
@@ -151,7 +150,7 @@ public:
                     }
                     else
                     {
-                        errors.pop_front();
+                        errors.erase(errors.begin());
                         errors.push_back(error);
 
                         // Only in the case of early stopping and not in the case
@@ -160,19 +159,18 @@ public:
                         {
                             bool earlyStop = true;
 
-                            std::for_each(errors.cbegin(), errors.cend(),
-                                [&](const double& e)
+                            for (size_t i = errors.size() - 1; i > 0; i--)
+                            {
+                                if (errors[i - 1] - errors[i] > m_OptimizationTolerance)
                                 {
-                                    if (errors.front() - e > m_OptimizationTolerance)
-                                    {
-                                        earlyStop = false;
-                                    }
-                                });
+                                    earlyStop = false;
+                                }
+                            }
 
                             if (earlyStop)
                             {
                                 log("Optimization tolerance of " + std::to_string(m_OptimizationTolerance)
-                                    + " reached after " + std::to_string(n) + " iterations. Stopping.");
+                                    + " reached after " + std::to_string(epoch) + " epochs. Stopping.");
                                 break;
                             }
                         }
@@ -183,16 +181,13 @@ public:
                     if (m_LearningRateType == LearningRate::Adaptive
                         && errors.size() >= 3)
                     {
-                        auto it = errors.crbegin();
-                        double error2 = *it; std::advance(it, 1);
-                        double error1 = *it; std::advance(it, 1);
-                        double error0 = *it;
+                        size_t i = errors.size() - 1;
 
                         // Each time two consecutive epochs fail to
                         // decrease training loss by at least tol,
                         // the current learning rate is divided by 5.
-                        if (!(error0 - error1 > m_OptimizationTolerance
-                            && error1 - error2 > m_OptimizationTolerance))
+                        if (std::fabs(errors[i - 1] - errors[i]) < m_OptimizationTolerance
+                            && std::fabs(errors[i - 2] - errors[i - 1]) < m_OptimizationTolerance)
                         {
                             m_EffectiveLearningRate /= 5;
                             m_Net->updateLearningRate(m_EffectiveLearningRate);
@@ -202,12 +197,17 @@ public:
 
                 if (m_LearningRateType == LearningRate::InvScaling)
                 {
-                    m_EffectiveLearningRate = m_LearningRate / std::pow(n + 1, m_PowerT);
+                    m_EffectiveLearningRate = m_LearningRate / std::pow(epoch + 1, m_PowerT);
                     m_Net->updateLearningRate(m_EffectiveLearningRate);
                 }
             }
 
             log("Final error is " + std::to_string(error) + ".");
+
+            if (m_LearningRateType == LearningRate::Adaptive)
+            {
+                log("Final effective learning rate is " + std::to_string(m_EffectiveLearningRate) + ".");
+            }
 
             auto t1 = std::chrono::high_resolution_clock::now();
             auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
@@ -217,6 +217,14 @@ public:
         else
         {
             log("Input is empty. No training possible.");
+        }
+    }
+
+    void inspect(std::ostream& os) const
+    {
+        if (m_Net.get() != nullptr)
+        {
+            m_Net->inspect(os);
         }
     }
 

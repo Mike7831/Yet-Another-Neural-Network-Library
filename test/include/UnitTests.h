@@ -166,6 +166,18 @@ public:
         std::cout << "done. \n";
     }
 
+    void execBatchTrainingTests()
+    {
+        std::cout << ">> Testing weight updates after 3 forward and backward passes... ";
+        backPropRegressionBatch3N();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing weight updates after saving and loading the network in the "
+            << "middle of a batch training... ";
+        saveAndLoadNetworkAfterBatchTraining();
+        std::cout << "done. \n";
+    }
+
 private:
     void exceptions()
     {
@@ -423,7 +435,7 @@ private:
         net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
 
         net.propagateForward({ 0.05, 0.1 });
-        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
         net.inspect(os);
 
         compareLineByLine(__func__, os.str(), is.str());
@@ -442,7 +454,7 @@ private:
         os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
         os << "MSE: " << net.calcError({ 0.01, 0.99 }) << "\n";
 
-        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
         net.inspect(os);
 
         compareLineByLine(__func__, os.str(), is.str());
@@ -461,7 +473,7 @@ private:
         os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
         os << "MSE: " << net.calcError({ 0.01, 0.99 }) << "\n";
 
-        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
         net.inspect(os);
 
         compareLineByLine(__func__, os.str(), is.str());
@@ -480,7 +492,7 @@ private:
         os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
         os << "MSE: " << net.calcError({ 0.01, 0.99 }) << "\n";
 
-        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
         net.inspect(os);
 
         compareLineByLine(__func__, os.str(), is.str());
@@ -499,7 +511,7 @@ private:
         os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
         os << "MSE: " << net.calcError({ 0.01, 0.99 }) << "\n";
 
-        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
         net.inspect(os);
 
         compareLineByLine(__func__, os.str(), is.str());
@@ -517,7 +529,7 @@ private:
         for (size_t n = 0; n < 10000; n++)
         {
             net.propagateForward({ 0.05, 0.1 });
-            net.propagateBackward({ 0.01, 0.99 });
+            net.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
 
             if (n == 0)
             {
@@ -543,11 +555,11 @@ private:
 
         os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
         os << "Error: " << net.calcError({ 0.01, 0.99 }) << "\n";
-        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
 
         os << "Output: " << net.propagateForward({ 0.05, 0.1 }) << "\n";
         os << "Error: " << net.calcError({ 0.01, 0.99 }) << "\n";
-        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
         net.inspect(os);
 
         compareLineByLine(__func__, os.str(), is.str());
@@ -562,9 +574,9 @@ private:
         net1.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
 
         net1.propagateForward({ 0.05, 0.1 });
-        net1.propagateBackward({ 0.01, 0.99 });
+        net1.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
         net1.propagateForward({ 0.05, 0.1 });
-        net1.propagateBackward({ 0.01, 0.99 });
+        net1.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
 
         net1.saveToFile(std::string(kOutputDir) + "net1.txt");
 
@@ -579,8 +591,8 @@ private:
         }
 
 
-        net1.propagateBackward({ 0.01, 0.99 });
-        net2.propagateBackward({ 0.01, 0.99 });
+        net1.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
+        net2.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
         net1.saveToFile(std::string(kOutputDir) + "net1.txt");
         net2.saveToFile(std::string(kOutputDir) + "net2.txt");
         NeuralNetwork net1b = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
@@ -613,9 +625,9 @@ private:
         net2.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
 
         net1.propagateForward({ 0.05, 0.1 }); net2.propagateForward({ 0.05, 0.1 });
-        net1.propagateBackward({ 0.01, 0.99 }); net2.propagateBackward({ 0.01, 0.99 });
+        net1.propagateBackwardAndUpdateWeights({ 0.01, 0.99 }); net2.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
         net1.propagateForward({ 0.05, 0.1 }); net2.propagateForward({ 0.05, 0.1 });
-        net1.propagateBackward({ 0.01, 0.99 }); net2.propagateBackward({ 0.01, 0.99 });
+        net1.propagateBackwardAndUpdateWeights({ 0.01, 0.99 }); net2.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
 
         net1.saveToFile(std::string(kOutputDir) + "net1.txt");
         net2.saveToFile(std::string(kOutputDir) + "net2.txt");
@@ -634,9 +646,9 @@ private:
         net1.addOutputRegressionLayer(3, ActivationFunctions::Logistic, 0.6);
 
         net1.propagateForward({ 0.05, 0.1 });
-        net1.propagateBackward({ 0.01, 0.99, 0.85 });
+        net1.propagateBackwardAndUpdateWeights({ 0.01, 0.99, 0.85 });
         net1.propagateForward({ 0.05, 0.1 });
-        net1.propagateBackward({ 0.01, 0.99, 0.85 });
+        net1.propagateBackwardAndUpdateWeights({ 0.01, 0.99, 0.85 });
 
         net1.saveToFile(std::string(kOutputDir) + "net1.txt");
 
@@ -651,8 +663,8 @@ private:
         }
 
 
-        net1.propagateBackward({ 0.01, 0.99, 0.85 });
-        net2.propagateBackward({ 0.01, 0.99, 0.85 });
+        net1.propagateBackwardAndUpdateWeights({ 0.01, 0.99, 0.85 });
+        net2.propagateBackwardAndUpdateWeights({ 0.01, 0.99, 0.85 });
         net1.saveToFile(std::string(kOutputDir) + "net1.txt");
         net2.saveToFile(std::string(kOutputDir) + "net2.txt");
         NeuralNetwork net1b = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
@@ -692,7 +704,7 @@ private:
         net.addOutputClassificationLayer({ {0.4, 0.45}, {0.5, 0.55} }, 0.6);
 
         net.propagateForward({ 0.05, 0.1 });
-        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateBackwardAndUpdateWeights({ 0.01, 0.99 });
         net.inspect(os);
 
         compareLineByLine(__func__, os.str(), is.str());
@@ -722,7 +734,7 @@ private:
         net.addOutputClassificationLayer({ {0.4, 0.45}, {0.5, 0.55}, {0.8, 0.4} }, 0.6);
 
         net.propagateForward({ 0.05, 0.1 });
-        net.propagateBackward({ 0.01, 0.99, 0.82 });
+        net.propagateBackwardAndUpdateWeights({ 0.01, 0.99, 0.82 });
         net.inspect(os);
 
         compareLineByLine(__func__, os.str(), is.str());
@@ -735,9 +747,9 @@ private:
         net1.addOutputClassificationLayer({ {0.4, 0.45}, {0.5, 0.55}, {0.8, 0.4} }, 0.6);
 
         net1.propagateForward({ 0.05, 0.1 });
-        net1.propagateBackward({ 0.01, 0.99, 0.82 });
+        net1.propagateBackwardAndUpdateWeights({ 0.01, 0.99, 0.82 });
         net1.propagateForward({ 0.05, 0.1 });
-        net1.propagateBackward({ 0.01, 0.99, 0.82 });
+        net1.propagateBackwardAndUpdateWeights({ 0.01, 0.99, 0.82 });
 
         net1.saveToFile(std::string(kOutputDir) + "net1.txt");
 
@@ -752,8 +764,8 @@ private:
         }
 
 
-        net1.propagateBackward({ 0.01, 0.99, 0.82 });
-        net2.propagateBackward({ 0.01, 0.99, 0.82 });
+        net1.propagateBackwardAndUpdateWeights({ 0.01, 0.99, 0.82 });
+        net2.propagateBackwardAndUpdateWeights({ 0.01, 0.99, 0.82 });
         net1.saveToFile(std::string(kOutputDir) + "net1.txt");
         net2.saveToFile(std::string(kOutputDir) + "net2.txt");
         NeuralNetwork net1b = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
@@ -789,7 +801,7 @@ private:
             for (const std::pair<std::vector<double>, double>& trainingSet : trainingSets)
             {
                 net.propagateForward(trainingSet.first);
-                net.propagateBackward(trainingSet.second);
+                net.propagateBackwardAndUpdateWeights(trainingSet.second);
             }
         }
 
@@ -882,7 +894,7 @@ private:
             for (const std::pair<std::vector<double>, double>& trainingSet : trainingSets)
             {
                 net.propagateForward(trainingSet.first);
-                net.propagateBackward(trainingSet.second);
+                net.propagateBackwardAndUpdateWeights(trainingSet.second);
             }
         }
 
@@ -1048,7 +1060,7 @@ private:
             for (const std::pair<std::vector<double>, uint8_t>& trainingSet : trainingSets)
             {
                 net.propagateForward(trainingSet.first);
-                net.propagateBackward(Utils::convertLabelToVect(trainingSet.second, 0, 1));
+                net.propagateBackwardAndUpdateWeights(Utils::convertLabelToVect(trainingSet.second, 0, 1));
             }
         }
 
@@ -1074,6 +1086,58 @@ private:
             net.propagateForward(testSet.first);
             assert(net.probableClass() == mlp.predict(testSet.first));
         }
+    }
+
+    void backPropRegressionBatch3N()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+
+        NeuralNetwork net(2, 0.5);
+        net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+
+        net.propagateForward({ 0.05, 0.1 });
+        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateForward({ 0.08, 0.1 });
+        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateForward({ 0.05, 0.1 });
+        net.propagateBackward({ 0.01, 0.99 });
+        net.updateWeights();
+        net.inspect(os);
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void saveAndLoadNetworkAfterBatchTraining()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+
+        {
+            NeuralNetwork net1(2, 0.5);
+            net1.addDropoutLayer(0.0);
+            net1.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+            net1.addDropoutLayer(0.0);
+            net1.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+
+            net1.propagateForward({ 0.05, 0.1 });
+            net1.propagateBackward({ 0.01, 0.99 });
+            net1.propagateForward({ 0.08, 0.1 });
+            net1.propagateBackward({ 0.01, 0.99 });
+            net1.propagateForward({ 0.05, 0.1 });
+
+            net1.saveToFile(std::string(kOutputDir) + "net1.txt");
+        }
+
+        {
+            NeuralNetwork net1 = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
+            net1.propagateBackward({ 0.01, 0.99 });
+            net1.updateWeights();
+            net1.inspect(os);
+        }
+
+        compareLineByLine(__func__, os.str(), is.str());
     }
 
     std::stringstream readExpectedResultFile(const std::string& filepath)

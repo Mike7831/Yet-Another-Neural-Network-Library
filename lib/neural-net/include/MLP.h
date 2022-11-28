@@ -124,12 +124,12 @@ public:
                     {
                         std::vector<double> expectedOutput = Utils::convertLabelToVect((t_Labels) expectedOuputs[i], min, max);
                         error += m_Net->calcError(expectedOutput);
-                        m_Net->propagateBackward(expectedOutput);
+                        m_Net->propagateBackwardAndUpdateWeights(expectedOutput);
                     }
                     else
                     {
                         error += m_Net->calcError(expectedOuputs[i]);
-                        m_Net->propagateBackward(expectedOuputs[i]);
+                        m_Net->propagateBackwardAndUpdateWeights(expectedOuputs[i]);
                     }
                 }
 

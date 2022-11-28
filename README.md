@@ -169,3 +169,4 @@ Mickael Deloison
 [MLPClassifier specification](https://scikit-learn.org/stable/modules/generated/sklearn.neural_network.MLPClassifier.html)  
 [Dropout layer](https://keras.io/api/layers/regularization_layers/dropout/)  
 [Gradient Descent With Momentum from Scratch](https://machinelearningmastery.com/gradient-descent-with-momentum-from-scratch/)  
+[Decoding the input shapes and output shapes of Multi Layered Perceptron model](https://medium.com/analytics-vidhya/decoding-the-input-shapes-and-output-shapes-of-multi-layered-perceptron-model-bf939b8579d8)

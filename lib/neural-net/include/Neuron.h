@@ -19,7 +19,8 @@ public:
         double momentum, const std::shared_ptr<SeedGenerator>& seedGen, double bias = 0.0) :
         m_AFunc(ActivationFunctionFactory::build(afunc)), m_AFuncID(afunc), m_LearningRate(learningRate),
         m_Momentum(momentum), m_Bias(bias),
-        m_WeightsPrevChange(weightsN),  m_BiasPrevChange(0.0), m_Inputs(weightsN)
+        m_WeightsPrevChange(weightsN), m_BiasPrevChange(0.0),
+        m_Inputs(weightsN), m_Gradients(weightsN)
     {
         std::mt19937 weightGenerator(seedGen->seed());
         std::uniform_real_distribution<double> weightDist(-0.5, 0.5);
@@ -34,7 +35,8 @@ public:
         double momentum, double bias = 0.0) :
         m_AFunc(ActivationFunctionFactory::build(afunc)), m_AFuncID(afunc), m_LearningRate(learningRate),
         m_Momentum(momentum), m_Bias(bias), m_Weights(weights),
-        m_WeightsPrevChange(weights.size()), m_BiasPrevChange(0.0), m_Inputs(weights.size())
+        m_WeightsPrevChange(weights.size()), m_BiasPrevChange(0.0),
+        m_Inputs(weights.size()), m_Gradients(weights.size())
     {
 
     }
@@ -62,17 +64,17 @@ public:
         m_Inputs = inputs;
         double total = 0.0;
 
-            for (size_t n = 0; n < inputs.size(); n++)
-            {
-                // /!\ If more inputs than weights then exception.
-                // Should not occur as the number of weights is verified if weights are
-                // provided manually, and dimensioned accordingly if not provided.
-                total += inputs[n] * m_Weights[n];
-            }
+        for (size_t n = 0; n < inputs.size(); n++)
+        {
+            // /!\ If more inputs than weights then exception.
+            // Should not occur as the number of weights is verified if weights are
+            // provided manually, and dimensioned accordingly if not provided.
+            total += inputs[n] * m_Weights[n];
+        }
 
-            total += m_Bias;
+        total += m_Bias;
 
-            m_Output = m_AFunc->calc(total);
+        m_Output = m_AFunc->calc(total);
 
         return m_Output;
     }
@@ -87,6 +89,7 @@ public:
         return std::pow(target - m_Output, 2);
     }
 
+    
     void propagateBackwardOutputLayer(double target)
     {
         // dE/dw = dE/do * do/dn * dn/dw = Gradient
@@ -95,6 +98,9 @@ public:
         // dn/dw = i
         // dE/dw = [ -(t - o) * f'(o) ] * i = delta * i
         m_Delta = -(target - m_Output) * m_AFunc->calcDerivate(m_Output);
+        m_NumberOfPasses += 1;
+
+        calcGradient();
     }
 
     void propagateBackwardClassificationLayer(double delta)
@@ -102,6 +108,9 @@ public:
         // For a classification layer the delta is calculated at layer level
         // because several neuron values are necessary to calculate it.
         m_Delta = delta;
+        m_NumberOfPasses += 1;
+
+        calcGradient();
     }
 
     void propagateBackwardHiddenLayer(double sumWeightedDeltaNextLayer,
@@ -123,28 +132,36 @@ public:
         // dE/do = Sum(deltaOutputNeurons * w)
         // do/dn = f'(oh)
         m_Delta = sumWeightedDeltaNextLayer * m_AFunc->calcDerivate(m_Output);
+        m_NumberOfPasses += 1;
+
+        calcGradient();
     }
 
     void updateWeights()
     {
+        if (m_NumberOfPasses == 0)
+        {
+            return;
+        }
+
         double change = 0.0;
 
         for (size_t n = 0; n < m_Inputs.size(); n++)
         {
-            // dn/dw = i
-            // Gradient = delta * dn/dw = delta * i
-            double gradient = m_Delta * m_Inputs[n];
-
             // https://machinelearningmastery.com/gradient-descent-with-momentum-from-scratch/
             // m_PrevChange[] initialized to 0.0
-            change = m_LearningRate * gradient + m_Momentum * m_WeightsPrevChange[n];
+            change = m_LearningRate * m_Gradients[n] / m_NumberOfPasses + m_Momentum * m_WeightsPrevChange[n];
             m_Weights[n] -= change;
             m_WeightsPrevChange[n] = change;
         }
 
-        change = m_LearningRate * (m_Delta * 1.0) + m_Momentum * m_BiasPrevChange;
+        change = m_LearningRate * m_BiasGradient / m_NumberOfPasses + m_Momentum * m_BiasPrevChange;
         m_Bias -= change;
         m_BiasPrevChange = change;
+
+        std::fill(m_Gradients.begin(), m_Gradients.end(), 0.0);
+        m_BiasGradient = 0.0;
+        m_NumberOfPasses = 0;
     }
 
     double delta() const
@@ -168,7 +185,7 @@ public:
     {
         output << "[NeuronBegin] \n"
             << "  ActivationFunction: " << static_cast<int>(m_AFuncID) << "\n"
-            << "  Momentum: " << m_Momentum << "\n" 
+            << "  Momentum: " << m_Momentum << "\n"
             << "  LearningRate: " << m_LearningRate << "\n"
             << "  Connections: " << m_Weights.size() << "\n"
             << "  Weights: ";
@@ -199,6 +216,17 @@ public:
         }
 
         output << "\n"
+            << "  Gradients: ";
+
+        for (const auto& gradient : m_Gradients)
+        {
+            output << gradient << " ";
+        }
+
+        output << m_BiasGradient;
+
+        output << "\n"
+            << "  Passes: " << m_NumberOfPasses << "\n"
             << "  Output: " << m_Output << "\n"
             << "  Delta: " << m_Delta << "\n"
             << "[NeuronEnd] \n";
@@ -250,6 +278,16 @@ public:
             file >> neuron.m_Inputs[i];
         }
 
+        Utils::checkTag(file, tag, "Gradients:");
+
+        for (size_t i = 0; i < size; i++)
+        {
+            file >> neuron.m_Gradients[i];
+        }
+
+        file >> neuron.m_BiasGradient;
+
+        file >> tag >> neuron.m_NumberOfPasses;
         file >> tag >> neuron.m_Output;
         file >> tag >> neuron.m_Delta;
 
@@ -271,6 +309,21 @@ private:
     double m_Output = 0.0;
     std::vector<double> m_Inputs;
     double m_Delta = 0.0;
+    size_t m_NumberOfPasses = 0;
+    std::vector<double> m_Gradients;
+    double m_BiasGradient = 0.0;
+
+    void calcGradient()
+    {
+        for (size_t n = 0; n < m_Inputs.size(); n++)
+        {
+            // dn/dw = i
+            // Gradient = delta * dn/dw = delta * i
+            m_Gradients[n] += m_Delta * m_Inputs[n];
+        }
+
+        m_BiasGradient += m_Delta * 1.0; // Bias gradient
+    }
 };
 
 }

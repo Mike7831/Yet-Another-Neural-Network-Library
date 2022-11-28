@@ -13,8 +13,8 @@ namespace YANNL
 class NeuralNetwork
 {
 public:
-    //! Creates a neural network with an input layer of @ref inputSize. It is mandatory
-    //! to then add at least one dense layer which will be the output layer.
+    //! Creates a neural network with an input layer of @p inputSize. It is mandatory
+    //! to then add at least one output regression or classification layer.
     //! @param inputSize Number of neurons on the input layer.
     //! @param learningRate Learning rate (eta).
     //! @param momentum The momentum (lambda). 0 by default; no momentum.
@@ -63,10 +63,10 @@ public:
     }
 
     //! Adds a hidden layer which is a dense layer. See
-    //!   @ref addDenseLayer(LayerType, const std::vector<std::vector<double>>, ActivationFunctions, double)
+    //!   @ref addDenseLayer(LayerType, const std::vector<std::vector<double>>&, ActivationFunctions, double)
     //! @throws std::domain_error If this hidden layer is added after an output layer.
     //! @throws std::domain_error In case on inconsistencies in layerWeights. See
-    //!   @ref addDenseLayer(LayerType, const std::vector<std::vector<double>>, ActivationFunctions, double)
+    //!   @ref addDenseLayer(LayerType, const std::vector<std::vector<double>>&, ActivationFunctions, double)
     void addHiddenLayer(const std::vector<std::vector<double>>& layerWeights,
         ActivationFunctions afunc, double bias = 0.0)
     {
@@ -99,10 +99,10 @@ public:
     }
 
     //! Adds an output classification layer which is a dense layer. See
-    //! @ref addDenseLayer(LayerType, const std::vector<std::vector<double>>, ActivationFunctions, double)
+    //! @ref addDenseLayer(LayerType, const std::vector<std::vector<double>>&, ActivationFunctions, double)
     //! @throws std::domain_error If this output layer is added after an output layer.
     //! @throws std::domain_error See
-    //!   @ref addDenseLayer(LayerType, const std::vector<std::vector<double>>, ActivationFunctions, double)
+    //!   @ref addDenseLayer(LayerType, const std::vector<std::vector<double>>&, ActivationFunctions, double)
     void addOutputClassificationLayer(const std::vector<std::vector<double>>& layerWeights,
         double bias = 0.0)
     {
@@ -134,10 +134,10 @@ public:
     }
 
     //! Adds an output regression layer which is a dense layer. See
-    //! @ref addDenseLayer(LayerType, const std::vector<std::vector<double>>, ActivationFunctions, double)
+    //! @ref addDenseLayer(LayerType, const std::vector<std::vector<double>>&, ActivationFunctions, double)
     //! @throws std::domain_error If this output layer is added after an output layer.
     //! @throws std::domain_error See
-    //!   @ref addDenseLayer(LayerType, const std::vector<std::vector<double>>, ActivationFunctions, double)
+    //!   @ref addDenseLayer(LayerType, const std::vector<std::vector<double>>&, ActivationFunctions, double)
     void addOutputRegressionLayer(const std::vector<std::vector<double>>& layerWeights,
         ActivationFunctions afunc, double bias = 0.0)
     {
@@ -289,18 +289,18 @@ public:
     }
 
     //! Converts the single-value expected output to a vector and calls
-    //! the @ref calcError(const std::vector<double>&)
+    //! the @ref calcError(const std::vector<double>&) const
     //! @param expectedOutput Single-value output expected.
-    //! @returns See @ref calcError(const std::vector<double>&)
-    //! @throws See @ref calcError(const std::vector<double>&)
+    //! @returns See @ref calcError(const std::vector<double>&) const
+    //! @throws See @ref calcError(const std::vector<double>&) const
     double calcError(double expectedOutput)
     {
         const std::vector<double> expectedOutputs{ expectedOutput };
         return calcError(expectedOutputs);
     }
 
-    //! Propagates the expected output backward to first calculate the delta on each neuron
-    //! of each layer, and second to update the weights.
+    //! Propagates the expected output backward to  calculate the delta and gradient on
+    //! each neuron of each layer. Weights then need to be updated with @ref updateWeights()
     //! Propagate forward first before propagating backward.
     //! @param expectedOutputs Vector of expected outputs to be compared to the internal
     //!   vector of actual outputs.
@@ -331,11 +331,29 @@ public:
             std::shared_ptr<const NeuronLayer> nextLayer = *(layer - 1);
             (*layer)->propagateBackwardHiddenLayer(*nextLayer);
         }
+    }
 
+    //! Updates the weights with the previously calculated deltas and gradients with
+    //! @ref propagateBackward(const std::vector<double>&)
+    //! Propagate backward first before updating the weights.
+    //! Propagate forward and backward several times in case of (mini-)batches.
+    void updateWeights()
+    {
         for (size_t n = 0; n < m_Layers.size(); n++)
         {
             m_Layers[n]->updateWeights();
         }
+    }
+
+    //! For on-line stochastic gradient descent where weights are updated after each
+    //! forward and backward pass, this helper can be used. It simply calls the related
+    //! @ref propagateBackward(const std::vector<double>&) function and then the
+    //! @ref updateWeights() function. See those functions for reference.
+    //! @param expectedOuputs Vector of expected outputs
+    void propagateBackwardAndUpdateWeights(const std::vector<double>& expectedOutputs)
+    {
+        propagateBackward(expectedOutputs);
+        updateWeights();
     }
 
     //! Converts the single-value expected output to a vector and calls
@@ -345,6 +363,19 @@ public:
     {
         const std::vector<double> expectedOutputs{ expectedOutput };
         propagateBackward(expectedOutputs);
+    }
+
+    //! For on-line stochastic gradient descent where weights are updated after each
+    //! forward and backward pass, this helper can be used. It simply converts single-value
+    //! expected output to a vector and calls the calls the related @ref
+    //! propagateBackward(const std::vector<double>&) function and then the @ref
+    //! updateWeights() function. See those functions for reference.
+    //! @param expectedOutput Single-value output expected.
+    void propagateBackwardAndUpdateWeights(double expectedOutput)
+    {
+        const std::vector<double> expectedOutputs{ expectedOutput };
+        propagateBackward(expectedOutputs);
+        updateWeights();
     }
 
     bool saveToFile(const std::string& filepath) const
@@ -377,8 +408,7 @@ public:
         return true;
     }
 
-    //! Loads a neural network from a previously serialized network to a file with
-    //! @ref saveToFile(const std::string&)
+    //! Loads a neural network from a previously serialized network to a file with @ref saveToFile(const std::string&) const
     //! @param filepath Path to the file containing the serialized neural network to load.
     //! @returns The reconstructed neural network.
     //! @throws std::ifstream::failure In case the file is not accessible.
@@ -475,7 +505,7 @@ private:
     }
 
     //! Adds a dense layer to the neural network with random weights.
-    //! @param layerType Either OutputRegressionLayer or HiddenLayer
+    //! @param layerType HiddenLayer, OutputClassification, OutputRegression. See @ref LayerType
     //! @param neuronsN Number of neurons.
     //! @param afunc Activation function for the layer.
     //! @param bias Additional bias if necessary. 0 by default.
@@ -503,11 +533,12 @@ private:
     }
 
     //! Adds a dense layer to the neural network with predefined weights.
+    //! @param layerType HiddenLayer, OutputClassification, OutputRegression. See @ref LayerType
     //! @param layerWeights Predefined weights. 2D vector. 1st D are the neurons,
     //!   2nd D are the weights.
     //! @param afunc Activation function for the layer.
     //! @param bias Additional bias if necessary. 0 by default.
-    //! @throws std::domain_error If there are inconsistencies in the @ref layerWeights e.g.
+    //! @throws std::domain_error If there are inconsistencies in the @p layerWeights e.g.
     //!   input size of 3 with 2 weights on the first neuron of the first layer is
     //!   inconsistent (3 weights expected for each of the neurons of the first layer).
     void addDenseLayer(LayerType layerType, const std::vector<std::vector<double>>& layerWeights,

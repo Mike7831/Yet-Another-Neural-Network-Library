@@ -365,3 +365,6 @@ FodyWeavers.xsd
 # Custom: Code::Blocks files
 *.depend
 *.layout
+
+# Custom: doxygen
+doxygen

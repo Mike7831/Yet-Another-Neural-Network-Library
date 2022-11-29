@@ -113,6 +113,29 @@ public:
         }
     }
 
+    void execBatchTrainingTests()
+    {
+        std::cout << ">> Testing weight updates after 3 forward and backward passes on "
+            << "a regression network... ";
+        batch3PBackPropRegression();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing weight updates after 3 forward and backward passes on "
+            << "a classification network... ";
+        batch3PBackPropClassification2N();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing weight updates after saving and loading a regression "
+            << "network in the middle of a batch training... ";
+        batchSaveAndLoadNetworkRegression();
+        std::cout << "done. \n";
+
+        std::cout << ">> Testing weight updates after saving and loading a classification "
+            << "network in the middle of a batch training... ";
+        batchSaveAndLoadNetworkRegression();
+        std::cout << "done. \n";
+    }
+
     void execMnistTests()
     {
         std::cout << ">> Reading MNIST test image file and check normalization method... ";
@@ -164,17 +187,13 @@ public:
         std::cout << ">> Testing MLPClassifier with constant learning rate and no early stopping... ";
         mlpClassifierConstLearningRateNoEarlyStopping();
         std::cout << "done. \n";
-    }
 
-    void execBatchTrainingTests()
-    {
-        std::cout << ">> Testing weight updates after 3 forward and backward passes... ";
-        backPropRegressionBatch3N();
+        std::cout << ">> Testing MLPRegressor with mini batches of size 3 on a sample of 8... ";
+        mlpRegressorMiniBatches();
         std::cout << "done. \n";
 
-        std::cout << ">> Testing weight updates after saving and loading the network in the "
-            << "middle of a batch training... ";
-        saveAndLoadNetworkAfterBatchTraining();
+        std::cout << ">> Testing MLPRegressor with full batch... ";
+        mlpRegressorBatch();
         std::cout << "done. \n";
     }
 
@@ -781,6 +800,102 @@ private:
         }
     }
 
+    void batch3PBackPropRegression()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+
+        NeuralNetwork net(2, 0.5);
+        net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+
+        net.propagateForward({ 0.05, 0.1 });
+        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateForward({ 0.08, 0.1 });
+        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateForward({ 0.05, 0.1 });
+        net.propagateBackward({ 0.01, 0.99 });
+        net.updateWeights();
+        net.inspect(os);
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void batch3PBackPropClassification2N()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+
+        NeuralNetwork net(2, 0.5);
+        net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net.addOutputClassificationLayer({ {0.4, 0.45}, {0.5, 0.55} }, 0.6);
+
+        net.propagateForward({ 0.05, 0.1 });
+        net.propagateBackward({ 0.01, 0.99 });
+        net.propagateForward({ 0.1, 0.1 });
+        net.propagateBackward({ 0.1, 0.7 });
+        net.propagateForward({ 0.05, 0.1 });
+        net.propagateBackward({ 0.01, 0.99 });
+        net.updateWeights();
+        net.inspect(os);
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void batchSaveAndLoadNetworkRegression()
+    {
+        std::ostringstream os;
+        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+
+        NeuralNetwork net1(2, 0.5);
+        net1.addDropoutLayer(0.0);
+        net1.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net1.addDropoutLayer(0.0);
+        net1.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+
+        net1.propagateForward({ 0.05, 0.1 });
+        net1.propagateBackward({ 0.01, 0.99 });
+        net1.propagateForward({ 0.08, 0.1 });
+        net1.propagateBackward({ 0.01, 0.99 });
+        net1.propagateForward({ 0.05, 0.1 });
+
+        net1.saveToFile(std::string(kOutputDir) + "net1.txt");
+
+        NeuralNetwork net2 = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
+        net2.propagateBackward({ 0.01, 0.99 });
+        net2.updateWeights();
+        net2.inspect(os);
+
+        compareLineByLine(__func__, os.str(), is.str());
+    }
+
+    void batchSaveAndLoadNetworkClassification()
+    {
+        std::ostringstream os2, os3;
+
+        NeuralNetwork net1(2, 0.5, 0.9, true, 20);
+        net1.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
+        net1.addDropoutLayer(0.5);
+        net1.addOutputClassificationLayer({ {0.4, 0.45}, {0.5, 0.55}, {0.8, 0.4} }, 0.6);
+        NeuralNetwork net2(net1);
+
+        net1.propagateForward({ 0.05, 0.1 }); net2.propagateForward({ 0.05, 0.1 });
+        net1.propagateBackward({ 0.01, 0.99 }); net2.propagateBackward({ 0.01, 0.99 });
+        net1.propagateForward({ 0.1, 0.1 }); net2.propagateForward({ 0.1, 0.1 });
+        net1.propagateBackward({ 0.1, 0.7 }); net2.propagateBackward({ 0.1, 0.7 });
+        net1.propagateForward({ 0.05, 0.1 }); net2.propagateForward({ 0.05, 0.1 });
+        net2.propagateBackward({ 0.01, 0.99 });
+
+        net1.saveToFile(std::string(kOutputDir) + "net1.txt");
+
+        NeuralNetwork net3 = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
+        net3.propagateBackward({ 0.01, 0.99 });
+        net2.updateWeights(); net3.updateWeights();
+        net2.inspect(os2); net3.inspect(os3);
+
+        compareLineByLine(__func__, os2.str(), os3.str());
+    }
+
     void xorRandomWeightsFixedSeed()
     {
         std::ostringstream os;
@@ -879,7 +994,7 @@ private:
 
     void mlpRegressorConstLearningRateNoEarlyStopping()
     {
-        NeuralNetwork net(2, 0.5, 0.9, true, 10); // Random weights but with a fixed seed
+        NeuralNetwork net(2, 0.01, 0.9, true, 10); // Random weights but with a fixed seed
         net.addHiddenLayer(5, ActivationFunctions::Logistic);
         net.addOutputRegressionLayer(1, ActivationFunctions::Logistic);
 
@@ -889,7 +1004,7 @@ private:
             { {1, 0}, 1},
             { {1, 1}, 0} };
 
-        for (size_t n = 0; n < 10000; n++)
+        for (size_t n = 0; n < 1000; n++)
         {
             for (const std::pair<std::vector<double>, double>& trainingSet : trainingSets)
             {
@@ -901,10 +1016,12 @@ private:
         MLPRegressor mlp({ 5 },             // hidden_layer_sizes
             ActivationFunctions::Logistic,  // activation
             Solvers::SGD,                   // solver
+            false,                          // use_batch_size
+            1,                              // batch_size
             LearningRate::Constant,         // learning_rate
-            0.5,                            // learning_rate_init
+            0.01,                           // learning_rate_init
             0.5,                            // power_t
-            10000,                          // max_iter
+            1000,                           // max_iter
             true,                           // use_random_state
             10,                             // random_state
             1.0E-4,                         // tol
@@ -913,7 +1030,7 @@ private:
             false,                          // early_stopping
             10                              // n_iter_no_change
         );
-        mlp.fit({ {0, 0},  {0, 1},  {1, 0},  {1, 1} }, { 0, 1, 1, 0 });
+        mlp.fit({ {0, 0}, {0, 1}, {1, 0}, {1, 1} }, { 0, 1, 1, 0 });
 
         for (const std::pair<std::vector<double>, double>& testSet : trainingSets)
         {
@@ -937,6 +1054,8 @@ private:
         MLPRegressor mlp({ 5 },             // hidden_layer_sizes
             ActivationFunctions::Logistic,  // activation
             Solvers::SGD,                   // solver
+            false,                          // use_batch_size
+            1,                              // batch_size
             LearningRate::Constant,         // learning_rate
             0.5,                            // learning_rate_init
             0.5,                            // power_t
@@ -949,7 +1068,7 @@ private:
             true,                           // early_stopping
             10                              // n_iter_no_change
         );
-        mlp.fit({ {0, 0},  {0, 1},  {1, 0},  {1, 1} }, { 0, 1, 1, 0 });
+        mlp.fit({ {0, 0}, {0, 1}, {1, 0}, {1, 1} }, { 0, 1, 1, 0 });
 
         std::ostringstream os;
         std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
@@ -977,6 +1096,8 @@ private:
         MLPRegressor mlp({ 5 },             // hidden_layer_sizes
             ActivationFunctions::Logistic,  // activation
             Solvers::SGD,                   // solver
+            false,                          // use_batch_size
+            1,                              // batch_size
             LearningRate::InvScaling,       // learning_rate
             0.5,                            // learning_rate_init
             0.5,                            // power_t
@@ -989,7 +1110,7 @@ private:
             false,                          // early_stopping
             10                              // n_iter_no_change
         );
-        mlp.fit({ {0, 0},  {0, 1},  {1, 0},  {1, 1} }, { 0, 1, 1, 0 });
+        mlp.fit({ {0, 0}, {0, 1}, {1, 0}, {1, 1} }, { 0, 1, 1, 0 });
 
         std::ostringstream os;
         std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
@@ -1017,6 +1138,8 @@ private:
         MLPRegressor mlp({ 5 },             // hidden_layer_sizes
             ActivationFunctions::Logistic,  // activation
             Solvers::SGD,                   // solver
+            false,                          // use_batch_size
+            1,                              // batch_size
             LearningRate::Adaptive,         // learning_rate
             0.5,                            // learning_rate_init
             0.5,                            // power_t
@@ -1029,7 +1152,7 @@ private:
             false,                          // early_stopping
             10                              // n_iter_no_change
         );
-        mlp.fit({ {0, 0},  {0, 1},  {1, 0},  {1, 1} }, { 0, 1, 1, 0 });
+        mlp.fit({ {0, 0}, {0, 1}, {1, 0}, {1, 1} }, { 0, 1, 1, 0 });
 
         std::ostringstream os;
         std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
@@ -1067,6 +1190,8 @@ private:
         MLPClassifer mlp({ 3, 3 },          // hidden_layer_sizes
             ActivationFunctions::Logistic,  // activation
             Solvers::SGD,                   // solver
+            false,                          // use_batch_size
+            1,                              // batch_size
             LearningRate::Constant,         // learning_rate
             0.1,                            // learning_rate_init
             0.5,                            // power_t
@@ -1079,7 +1204,7 @@ private:
             false,                          // early_stopping
             10                              // n_iter_no_change
         );
-        mlp.fit({ {0, 0},  {0, 1},  {1, 0},  {1, 1} }, { 0, 1, 1, 0 });
+        mlp.fit({ {0, 0}, {0, 1}, {1, 0}, {1, 1} }, { 0, 1, 1, 0 });
 
         for (const std::pair<std::vector<double>, double>& testSet : trainingSets)
         {
@@ -1088,56 +1213,131 @@ private:
         }
     }
 
-    void backPropRegressionBatch3N()
+    void mlpRegressorMiniBatches()
     {
-        std::ostringstream os;
-        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+        NeuralNetwork net(2, 0.01, 0.9, true, 10); // Random weights but with a fixed seed
+        net.addHiddenLayer(5, ActivationFunctions::Logistic);
+        net.addOutputRegressionLayer(1, ActivationFunctions::Logistic);
 
-        NeuralNetwork net(2, 0.5);
-        net.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-        net.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+        std::vector<std::pair<std::vector<double>, double>> trainingSets{
+            { {0, 0}, 0}, { {0, 0}, 0},
+            { {0, 1}, 1}, { {0, 1}, 1},
+            { {1, 0}, 1}, { {1, 0}, 1},
+            { {1, 1}, 0}, { {1, 1}, 0} };
 
-        net.propagateForward({ 0.05, 0.1 });
-        net.propagateBackward({ 0.01, 0.99 });
-        net.propagateForward({ 0.08, 0.1 });
-        net.propagateBackward({ 0.01, 0.99 });
-        net.propagateForward({ 0.05, 0.1 });
-        net.propagateBackward({ 0.01, 0.99 });
-        net.updateWeights();
-        net.inspect(os);
+        std::vector<std::pair<std::vector<double>, double>> batchTrainingSets(3);
 
-        compareLineByLine(__func__, os.str(), is.str());
+        for (size_t n = 0; n < 1000; n++)
+        {
+            batchTrainingSets[0] = trainingSets[0];
+            batchTrainingSets[1] = trainingSets[1];
+            batchTrainingSets[2] = trainingSets[2];
+
+            for (size_t i = 0; i < 3; i++)
+            {
+                net.propagateForward(batchTrainingSets[i].first);
+                net.propagateBackward(batchTrainingSets[i].second);
+            }
+
+            net.updateWeights();
+
+            batchTrainingSets[0] = trainingSets[3];
+            batchTrainingSets[1] = trainingSets[4];
+            batchTrainingSets[2] = trainingSets[5];
+
+            for (size_t i = 0; i < 3; i++)
+            {
+                net.propagateForward(batchTrainingSets[i].first);
+                net.propagateBackward(batchTrainingSets[i].second);
+            }
+
+            net.updateWeights();
+
+            batchTrainingSets[0] = trainingSets[6];
+            batchTrainingSets[1] = trainingSets[7];
+            
+            for (size_t i = 0; i < 2; i++) // Careful: 2 because this is the remaining population
+            {
+                net.propagateForward(batchTrainingSets[i].first);
+                net.propagateBackward(batchTrainingSets[i].second);
+            }
+
+            net.updateWeights();
+        }
+
+        MLPRegressor mlp({ 5 },             // hidden_layer_sizes
+            ActivationFunctions::Logistic,  // activation
+            Solvers::SGD,                   // solver
+            true,                           // use_batch_size
+            3,                              // batch_size
+            LearningRate::Constant,         // learning_rate
+            0.01,                           // learning_rate_init
+            0.5,                            // power_t
+            1000,                           // max_iter
+            true,                           // use_random_state
+            10,                             // random_state
+            1.0E-4,                         // tol
+            false,                          // verbose
+            0.9,                            // momentum
+            false,                          // early_stopping
+            10                              // n_iter_no_change
+        );
+        mlp.fit({ {0, 0}, {0, 0}, {0, 1}, {0, 1}, {1, 0}, {1, 0}, {1, 1}, {1, 1} }, { 0, 0, 1, 1, 1, 1, 0, 0 });
+
+        for (const std::pair<std::vector<double>, double>& testSet : trainingSets)
+        {
+            std::vector<double> output = net.propagateForward(testSet.first);
+            assert(output.front() == mlp.predict(testSet.first));
+        }
     }
 
-    void saveAndLoadNetworkAfterBatchTraining()
+    void mlpRegressorBatch()
     {
-        std::ostringstream os;
-        std::stringstream is = readExpectedResultFile(kTestDir + std::string(__func__) + kTestFileExt);
+        NeuralNetwork net(2, 0.01, 0.9, true, 10); // Random weights but with a fixed seed
+        net.addHiddenLayer(5, ActivationFunctions::Logistic);
+        net.addOutputRegressionLayer(1, ActivationFunctions::Logistic);
 
+        std::vector<std::pair<std::vector<double>, double>> trainingSets{
+            { {0, 0}, 0},
+            { {0, 1}, 1},
+            { {1, 0}, 1},
+            { {1, 1}, 0} };
+
+        for (size_t n = 0; n < 1000; n++)
         {
-            NeuralNetwork net1(2, 0.5);
-            net1.addDropoutLayer(0.0);
-            net1.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
-            net1.addDropoutLayer(0.0);
-            net1.addOutputRegressionLayer({ {0.4, 0.45}, {0.5, 0.55} }, ActivationFunctions::Logistic, 0.6);
+            for (const std::pair<std::vector<double>, double>& trainingSet : trainingSets)
+            {
+                net.propagateForward(trainingSet.first);
+                net.propagateBackward(trainingSet.second);
+            }
 
-            net1.propagateForward({ 0.05, 0.1 });
-            net1.propagateBackward({ 0.01, 0.99 });
-            net1.propagateForward({ 0.08, 0.1 });
-            net1.propagateBackward({ 0.01, 0.99 });
-            net1.propagateForward({ 0.05, 0.1 });
-
-            net1.saveToFile(std::string(kOutputDir) + "net1.txt");
+            net.updateWeights();
         }
 
-        {
-            NeuralNetwork net1 = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
-            net1.propagateBackward({ 0.01, 0.99 });
-            net1.updateWeights();
-            net1.inspect(os);
-        }
+        MLPRegressor mlp({ 5 },             // hidden_layer_sizes
+            ActivationFunctions::Logistic,  // activation
+            Solvers::SGD,                   // solver
+            true,                           // use_batch_size
+            trainingSets.size(),            // batch_size
+            LearningRate::Constant,         // learning_rate
+            0.01,                           // learning_rate_init
+            0.5,                            // power_t
+            1000,                           // max_iter
+            true,                           // use_random_state
+            10,                             // random_state
+            1.0E-4,                         // tol
+            false,                          // verbose
+            0.9,                            // momentum
+            false,                          // early_stopping
+            10                              // n_iter_no_change
+        );
+        mlp.fit({ {0, 0}, {0, 1}, {1, 0}, {1, 1} }, { 0, 1, 1, 0 });
 
-        compareLineByLine(__func__, os.str(), is.str());
+        for (const std::pair<std::vector<double>, double>& testSet : trainingSets)
+        {
+            std::vector<double> output = net.propagateForward(testSet.first);
+            assert(output.front() == mlp.predict(testSet.first));
+        }
     }
 
     std::stringstream readExpectedResultFile(const std::string& filepath)

@@ -12,13 +12,13 @@ int main(int argc, char* argv[])
     auto t0 = std::chrono::high_resolution_clock::now();
 
     YANNL_UnitTests tests;
-    //tests.execExceptionTests();
-    //tests.execNeuralNetworkTests();
-    //tests.execOtherTests();
-    //tests.execMnistTests();
-    //tests.execXMLTests();
-    //tests.execMLPTests();
+    tests.execExceptionTests();
+    tests.execNeuralNetworkTests();
     tests.execBatchTrainingTests();
+    tests.execOtherTests();
+    tests.execMnistTests();
+    tests.execXMLTests();
+    tests.execMLPTests();
 
     auto t1 = std::chrono::high_resolution_clock::now();
     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();

@@ -35,7 +35,7 @@ void xorTrainTestManualNN()
         for (const std::pair<std::vector<double>, double>& trainingSet : trainingSets)
         {
             net.propagateForward(trainingSet.first);
-            net.propagateBackward(trainingSet.second);
+            net.propagateBackwardAndUpdateWeights(trainingSet.second);
         }
     }
 
@@ -60,6 +60,8 @@ void xorTrainTestMLPRegressor()
     MLPRegressor mlp({ 5 },             // hidden_layer_sizes
         ActivationFunctions::Logistic,  // activation
         Solvers::SGD,                   // solver
+        false,                          // use_batch_size
+        1,                              // batch_size
         LearningRate::Constant,         // learning_rate
         0.5,                            // learning_rate_init
         0.5,                            // power_t

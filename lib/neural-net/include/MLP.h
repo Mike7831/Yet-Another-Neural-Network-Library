@@ -111,26 +111,44 @@ public:
             auto t0 = std::chrono::high_resolution_clock::now();
             std::vector<double> errors;
             double error = 0.0;
+            size_t nbBatches = 1, batchSize = m_BatchSize;
+
+            // If the MLP should not use the batch size it means it is an on-line stochastic
+            // gradient descent with batches of size 1.
+            if (!m_UseBatchSize)
+            {
+                batchSize = 1;
+                nbBatches = inputs.size();
+            }
+            else
+            {
+                nbBatches = inputs.size() / batchSize + (inputs.size() % batchSize == 0 ? 0 : 1);
+            }
 
             for (size_t epoch = 0; epoch < m_MaxIterations; epoch++)
             {
                 error = 0.0;
 
-                for (size_t i = 0; i < inputs.size(); i++)
+                for (size_t batch = 0; batch < nbBatches; batch++)
                 {
-                    m_Net->propagateForward(inputs[i]);
+                    for (size_t i = batch * batchSize; i < (batch + 1) * batchSize && i < inputs.size(); i++)
+                    {
+                        m_Net->propagateForward(inputs[i]);
 
-                    if (type() == MLPType::Classifier)
-                    {
-                        std::vector<double> expectedOutput = Utils::convertLabelToVect((t_Labels) expectedOuputs[i], min, max);
-                        error += m_Net->calcError(expectedOutput);
-                        m_Net->propagateBackwardAndUpdateWeights(expectedOutput);
+                        if (type() == MLPType::Classifier)
+                        {
+                            std::vector<double> expectedOutput = Utils::convertLabelToVect((t_Labels)expectedOuputs[i], min, max);
+                            error += m_Net->calcError(expectedOutput);
+                            m_Net->propagateBackward(expectedOutput);
+                        }
+                        else
+                        {
+                            error += m_Net->calcError(expectedOuputs[i]);
+                            m_Net->propagateBackward(expectedOuputs[i]);
+                        }
                     }
-                    else
-                    {
-                        error += m_Net->calcError(expectedOuputs[i]);
-                        m_Net->propagateBackwardAndUpdateWeights(expectedOuputs[i]);
-                    }
+
+                    m_Net->updateWeights();
                 }
 
                 error /= inputs.size();
@@ -235,6 +253,8 @@ protected:
         const std::vector<size_t>& hidden_layer_sizes,
         ActivationFunctions activation,
         Solvers solver,
+        bool use_batch_size,
+        size_t batch_size,
         LearningRate learning_rate,
         double learning_rate_init,
         double power_t,
@@ -249,6 +269,8 @@ protected:
         m_HiddenLayerSizes(hidden_layer_sizes),
         m_AFunc(activation),
         m_Solver(solver),
+        m_UseBatchSize(use_batch_size),
+        m_BatchSize(batch_size),
         m_LearningRateType(learning_rate),
         m_LearningRate(learning_rate_init),
         m_PowerT(power_t),
@@ -279,6 +301,8 @@ private:
     const std::vector<size_t> m_HiddenLayerSizes;
     const ActivationFunctions m_AFunc;
     const Solvers m_Solver;
+    const bool m_UseBatchSize;
+    const size_t m_BatchSize;
     const LearningRate m_LearningRateType;
     const double m_LearningRate;
     const double m_PowerT;
@@ -301,6 +325,8 @@ public:
         const std::vector<size_t>& hidden_layer_sizes = { 100 },
         ActivationFunctions activation = ActivationFunctions::ReLU,
         Solvers solver = Solvers::SGD,
+        bool use_batch_size = false,
+        size_t batch_size = 0,
         LearningRate learning_rate = LearningRate::Constant,
         double learning_rate_init = 0.001,
         double power_t = 0.5,
@@ -315,6 +341,8 @@ public:
         MLP(hidden_layer_sizes,
             activation,
             solver,
+            use_batch_size,
+            batch_size,
             learning_rate,
             learning_rate_init,
             power_t,
@@ -360,6 +388,8 @@ public:
         const std::vector<size_t>& hidden_layer_sizes = { 100 },
         ActivationFunctions activation = ActivationFunctions::ReLU,
         Solvers solver = Solvers::SGD,
+        bool use_batch_size = false,
+        size_t batch_size = 0,
         LearningRate learning_rate = LearningRate::Constant,
         double learning_rate_init = 0.001,
         double power_t = 0.5,
@@ -374,6 +404,8 @@ public:
         MLP(hidden_layer_sizes,
             activation,
             solver,
+            use_batch_size,
+            batch_size,
             learning_rate,
             learning_rate_init,
             power_t,

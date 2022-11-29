@@ -99,7 +99,7 @@ void IrisClassification::irisClassificationTrainTestManualNN(const std::string& 
         {
             std::vector<double> expectedOutput = Utils::convertLabelToVect(irisItem.second, 0, 2);
             net.propagateForward(irisItem.first);
-            net.propagateBackward(expectedOutput);
+            net.propagateBackwardAndUpdateWeights(expectedOutput);
             error += net.calcError(expectedOutput);
         }
 
@@ -164,6 +164,8 @@ void IrisClassification::irisClassificationTrainTestMLPClassifier(const std::str
     MLPClassifer mlp({ 3, 3 },          // hidden_layer_sizes
         ActivationFunctions::Logistic,  // activation
         Solvers::SGD,                   // solver
+        false,                          // use_batch_size
+        1,                              // batch_size
         LearningRate::Constant,         // learning_rate
         kLearningRate,                  // learning_rate_init
         0.5,                            // power_t
@@ -190,8 +192,6 @@ void IrisClassification::irisClassificationTrainTestMLPClassifier(const std::str
     mlp.fit(X, y);
 
     std::cout << "done. \n";
-
-    mlp.inspect(std::cout);
 
     std::cout << "Testing the network with the same dataset as the one for training... \n";
 

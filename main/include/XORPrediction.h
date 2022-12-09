@@ -10,11 +10,15 @@
 namespace YANNL
 {
 
-std::vector<std::pair<std::vector<double>, double>> getXORTrainingSet();
+class XORPrediction
+{
+public:
+    void xorTrainTestManualNN();
+    void xorTrainTestMLPRegressor();
 
-void xorTrainTestManualNN();
-
-void xorTrainTestMLPRegressor();
+private:
+    std::vector<std::pair<std::vector<double>, double>> getXORTrainingSet();
+};
 
 }
 

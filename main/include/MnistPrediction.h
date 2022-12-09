@@ -10,11 +10,15 @@
 namespace YANNL
 {
 
-void mnistTrain(const std::string& trainImagePath, const std::string& trainLabelPath,
-    const std::string& outputPath);
+class MnistPrediction
+{
+public:
+    void mnistTrain(const std::string& trainImagePath, const std::string& trainLabelPath,
+        const std::string& outputPath);
 
-void mnistTest(const std::string& networkPath, const std::string& testImagePath,
-    const std::string& testLabelPath);
+    void mnistTest(const std::string& networkPath, const std::string& testImagePath,
+        const std::string& testLabelPath);
+};
 
 }
 

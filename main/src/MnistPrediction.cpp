@@ -13,7 +13,7 @@ using namespace YANNL;
 namespace YANNL
 {
 
-void mnistTrain(const std::string& trainImagePath, const std::string& trainLabelPath,
+void MnistPrediction::mnistTrain(const std::string& trainImagePath, const std::string& trainLabelPath,
     const std::string& outputPath)
 {
     Utils::ShowConsoleCursor(false);
@@ -112,7 +112,7 @@ void mnistTrain(const std::string& trainImagePath, const std::string& trainLabel
     std::cout << "Network trained and saved. \n";
 }
 
-void mnistTest(const std::string& networkPath, const std::string& testImagePath,
+void MnistPrediction::mnistTest(const std::string& networkPath, const std::string& testImagePath,
     const std::string& testLabelPath)
 {
     Utils::ShowConsoleCursor(false);

@@ -132,7 +132,7 @@ public:
 
         std::cout << ">> Testing weight updates after saving and loading a classification "
             << "network in the middle of a batch training... ";
-        batchSaveAndLoadNetworkRegression();
+        batchSaveAndLoadNetworkClassification();
         std::cout << "done. \n";
     }
 
@@ -873,10 +873,10 @@ private:
     {
         std::ostringstream os2, os3;
 
-        NeuralNetwork net1(2, 0.5, 0.9, true, 20);
+        NeuralNetwork net1(2, 0.5, 0.9, true, 20); // Remove momentum, and dropout + seed to compare to walkthrough
         net1.addHiddenLayer({ { 0.15, 0.2 }, { 0.25, 0.3 } }, ActivationFunctions::Logistic, 0.35);
         net1.addDropoutLayer(0.5);
-        net1.addOutputClassificationLayer({ {0.4, 0.45}, {0.5, 0.55}, {0.8, 0.4} }, 0.6);
+        net1.addOutputClassificationLayer({ {0.4, 0.45}, {0.5, 0.55} }, 0.6);
         NeuralNetwork net2(net1);
 
         net1.propagateForward({ 0.05, 0.1 }); net2.propagateForward({ 0.05, 0.1 });
@@ -884,12 +884,11 @@ private:
         net1.propagateForward({ 0.1, 0.1 }); net2.propagateForward({ 0.1, 0.1 });
         net1.propagateBackward({ 0.1, 0.7 }); net2.propagateBackward({ 0.1, 0.7 });
         net1.propagateForward({ 0.05, 0.1 }); net2.propagateForward({ 0.05, 0.1 });
-        net2.propagateBackward({ 0.01, 0.99 });
 
         net1.saveToFile(std::string(kOutputDir) + "net1.txt");
 
         NeuralNetwork net3 = NeuralNetwork::loadFromFile(std::string(kOutputDir) + "net1.txt");
-        net3.propagateBackward({ 0.01, 0.99 });
+        net2.propagateBackward({ 0.01, 0.99 }); net3.propagateBackward({ 0.01, 0.99 });
         net2.updateWeights(); net3.updateWeights();
         net2.inspect(os2); net3.inspect(os3);
 

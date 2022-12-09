@@ -22,14 +22,16 @@ int main(int argc, char* argv[])
 
         std::cout << "Test XOR prediction with MLPRegressor vs. manually built regressors \n"
             << "================================================================================== \n\n";
-        xorTrainTestManualNN();
-        xorTrainTestMLPRegressor();
+        XORPrediction xorPrediction;
+        xorPrediction.xorTrainTestManualNN();
+        xorPrediction.xorTrainTestMLPRegressor();
         std::cout << "================================================================================== \n\n";
 
         std::cout << "Test prediction of MNIST handwritten digits (0-9) \n"
             << "================================================================================== \n\n";
-        mnistTrain("../data/train-images.idx3-ubyte", "../data/train-labels.idx1-ubyte", "../output/mnist-nn.txt");
-        mnistTest("../output/mnist-nn.txt", "../data/t10k-images.idx3-ubyte", "../data/t10k-labels.idx1-ubyte");
+        MnistPrediction mnistPrediction;
+        mnistPrediction.mnistTrain("../data/train-images.idx3-ubyte", "../data/train-labels.idx1-ubyte", "../output/mnist-nn.txt");
+        mnistPrediction.mnistTest("../output/mnist-nn.txt", "../data/t10k-images.idx3-ubyte", "../data/t10k-labels.idx1-ubyte");
         std::cout << "================================================================================== \n\n";
     }
     catch (std::exception& e)

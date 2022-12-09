@@ -10,7 +10,7 @@ using namespace YANNL;
 namespace YANNL
 {
 
-std::vector<std::pair<std::vector<double>, double>> getXORTrainingSet()
+std::vector<std::pair<std::vector<double>, double>> XORPrediction::getXORTrainingSet()
 {
     return {
         { {0, 0}, 0},
@@ -20,7 +20,7 @@ std::vector<std::pair<std::vector<double>, double>> getXORTrainingSet()
     };
 }
 
-void xorTrainTestManualNN()
+void XORPrediction::xorTrainTestManualNN()
 {
     std::cout << "Building and training the neural network (manually built)... \n";
 
@@ -51,7 +51,7 @@ void xorTrainTestManualNN()
     std::cout << "done. \n";
 }
 
-void xorTrainTestMLPRegressor()
+void XORPrediction::xorTrainTestMLPRegressor()
 {
     std::vector<std::pair<std::vector<double>, double>> trainingSets = getXORTrainingSet();
 
